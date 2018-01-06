@@ -150,7 +150,7 @@ class CoreModule(AbstractUnicornDbgModule):
                 for arg in args:
                     c += 1
                     # keep a reference (usefull for errors) of command\sub_command name
-                    main_command = arg
+                    command = arg
 
                     # if we already fetched the first main command
                     if h:
@@ -181,6 +181,7 @@ class CoreModule(AbstractUnicornDbgModule):
                         h = prev_h['sub_commands'][h['ref']]
 
                     # print help and usage passing h, the command object reference
+                    print("\nHelp for: "+colored(command, 'white', attrs=['underline', 'bold']))
                     print(h["help"])
                     self.print_usage(h)
                     # if there are sub_commands print a list of them
@@ -190,7 +191,7 @@ class CoreModule(AbstractUnicornDbgModule):
 
             except Exception as e:
                 print("search Err: " + str(e))
-                print("No help for command '" + main_command + "'" + ' found')
+                print("No help for command '" + command + "'" + ' found')
                 self.print_usage(func_name)
 
         # if we have no args (so no commands) just print the commands list
