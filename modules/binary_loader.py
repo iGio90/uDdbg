@@ -1,5 +1,6 @@
 import os
 
+import utils
 from modules.unicorndbgmodule import AbstractUnicornDbgModule
 
 
@@ -21,22 +22,15 @@ class BinaryLoader(AbstractUnicornDbgModule):
         p = input("Binary path: ")
         if os.path.isfile(p):
             p = open(p, 'rb').read()
-            try:
-                off = input('Offset: ')
-                if off.startswith('0x'):
-                    off = int(off, 16)
-                else:
-                    off = int(off)
-            except Exception as e:
-                print('Invalid integer')
-                return
+            off = utils.input_to_offset(input('Offset: '))
 
             binary_len = len(p)
 
-            if binary_len % 1024 is not 0:
-                binary_len += 1024-(binary_len % 1024)
+            if off % 1024 is not 0:
+                off += 1024 - (off % 1024)
 
-            print(hex(binary_len))
+            if binary_len % 1024 is not 0:
+                binary_len += 1024 - (binary_len % 1024)
 
             self.core_istance.get_emu_instance().mem_map(off, binary_len)
             self.core_istance.get_emu_instance().mem_write(off, p)

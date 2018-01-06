@@ -96,8 +96,7 @@ class CoreModule(AbstractUnicornDbgModule):
         print("TEST", args)
 
     def show(self, *args):
-        print(MENU_APIX + ' mappings')
-        print(MENU_APIX + ' patches')
+        pass
 
     def modules(self, func_name, *args):
         """

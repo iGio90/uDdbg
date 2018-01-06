@@ -1,7 +1,9 @@
+import capstone
 import inquirer
 
+from capstone import *
 from modules.core_module import CoreModule
-from modules import binary_loader
+from modules import binary_loader, memory
 from prompt_toolkit.auto_suggest import AutoSuggestFromHistory
 from prompt_toolkit.history import InMemoryHistory
 from prompt_toolkit.shortcuts import prompt
@@ -36,6 +38,9 @@ class UnicornDbgFunctions(object):
 
         binary_loader_module = binary_loader.BinaryLoader(self)
         self.add_module(binary_loader_module)
+
+        memory_module = memory.Memory(self)
+        self.add_module(memory_module)
 
     def exec_command(self, command, args):
         """
@@ -108,8 +113,12 @@ class UnicornDbgFunctions(object):
         print(args)
 
     def get_emu_instance(self):
-        """ expose emu_instance """
+        """ expose emu instance """
         return self.unicorndbg_instance.get_emu_instance()
+
+    def get_cs_instance(self):
+        """ expose capstone instance """
+        return self.unicorndbg_instance.get_cs_instance()
 
     def add_module(self, module):
         """
@@ -159,6 +168,7 @@ class UnicornDbg(object):
         self.arch = None
         self.mode = None
         self.emu_instance = None
+        self.cs = None
 
         self.history = InMemoryHistory()
 
@@ -193,8 +203,17 @@ class UnicornDbg(object):
             self.parse_command(text)
 
     def get_emu_instance(self):
-        """ expose emu_instance """
+        """ expose emu instance """
         return self.emu_instance
+
+    def get_cs_instance(self):
+        """ expose capstone instance """
+        if self.cs is None:
+            print('\nSetup capstone engine.')
+            a = getattr(capstone, prompt_cs_arch())
+            m = getattr(capstone, prompt_cs_mode())
+            self.cs = Cs(a, m)
+        return self.cs
 
     def parse_command(self, text):
         """
@@ -219,7 +238,17 @@ def prompt_arch():
 
 def prompt_mode():
     items = [k for k, v in unicorn_const.__dict__.items() if not k.startswith("__") and k.startswith("UC_MODE")]
+    return prompt_list(items, 'mode', 'Select mode')
+
+
+def prompt_cs_arch():
+    items = [k for k, v in capstone.__dict__.items() if not k.startswith("__") and k.startswith("CS_ARCH")]
     return prompt_list(items, 'arch', 'Select arch')
+
+
+def prompt_cs_mode():
+    items = [k for k, v in capstone.__dict__.items() if not k.startswith("__") and k.startswith("CS_MODE")]
+    return prompt_list(items, 'mode', 'Select mode')
 
 
 def prompt_list(items, key, hint):
