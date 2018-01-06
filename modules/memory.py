@@ -20,6 +20,7 @@ class Memory(AbstractUnicornDbgModule):
                 'help': 'Memory operations',
                 'sub_commands': {
                     'dump': {
+                        'usage': 'memory dump [offset] [length] [file path]',
                         'help': 'Dump memory',
                         'function': {
                             "context": "memory_module",
@@ -45,8 +46,14 @@ class Memory(AbstractUnicornDbgModule):
         }
 
     def dump(self, func_name, *args):
-        # todo
-        pass
+        if args:
+            off = utils.input_to_offset(args[0])
+            lent = utils.input_to_offset(args[1])
+            file_name = args[3]
+            b = self.core_istance.get_emu_instance().mem_read(off, lent)
+            with open(file_name, 'wb') as f:
+                f.write(b)
+            print(str(lent) + ' written to ' + file_name + '.')
 
     def read(self, func_name, *args):
         if args:
