@@ -55,6 +55,7 @@ class UnicornDbgFunctions(object):
         try:
 
             if command in self.commands_map:
+                main_command = command
 
                 # if we found the command but has the "ref" property,
                 # so we need to reference to another object. Ex. short command q --references--> quit
@@ -101,7 +102,7 @@ class UnicornDbgFunctions(object):
                     # and possible arguments to the function
                     call_method(command, *args)
                 else:
-                    print("'" + command + "' not implemented")
+                    self.exec_command('help',[main_command])
 
             else:
                 print("'"+command+"' not found")
