@@ -30,6 +30,15 @@ class CoreModule(AbstractUnicornDbgModule):
             'c': {
                 'ref': "start",
             },
+            'b': {
+                'ref': "breakpoint",
+            },
+            'bkp': {
+                'ref': "breakpoint",
+            },
+            'break': {
+                'ref': "breakpoint",
+            },
             'quit': {
                 'short': 'q',
                 'function': {
@@ -46,11 +55,14 @@ class CoreModule(AbstractUnicornDbgModule):
                 'help': 'Show command',
                 'usage': 'help [command]'
             },
-            'test': {
+            'breakpoint': {
+                'short': 'b,bkp,break',
                 'function': {
                     "context": "core_module",
-                    "f": "test"
+                    "f": "breakpoint"
                 },
+                'help': 'Break the emulation at specific offset',
+                'usage': 'breakpoint [address]'
             },
             'show': {
                 'short': 's',
@@ -92,8 +104,9 @@ class CoreModule(AbstractUnicornDbgModule):
             },
         }
 
-    def test(self, *args):
-        print("TEST", args)
+    def breakpoint(self, *args):
+        # todo
+        pass
 
     def show(self, *args):
         pass
