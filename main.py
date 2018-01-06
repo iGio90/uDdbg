@@ -3,7 +3,7 @@ import inquirer
 
 from capstone import *
 from modules.core_module import CoreModule
-from modules import binary_loader, memory
+from modules import binary_loader, memory, registers
 from prompt_toolkit.auto_suggest import AutoSuggestFromHistory
 from prompt_toolkit.history import InMemoryHistory
 from prompt_toolkit.shortcuts import prompt
@@ -32,7 +32,6 @@ class UnicornDbgFunctions(object):
 
         # create a core_module instance (with all core commands and functionality) and load them
         # pass an instance of self in order to allow cores methods to get access to context_map and commands_map
-
         core_module_instance = CoreModule(self)
         self.add_module(core_module_instance)
 
@@ -41,6 +40,9 @@ class UnicornDbgFunctions(object):
 
         memory_module = memory.Memory(self)
         self.add_module(memory_module)
+
+        registers_module = registers.Registers(self)
+        self.add_module(registers_module)
 
     def exec_command(self, command, args):
         """
