@@ -135,6 +135,8 @@ class CoreModule(AbstractUnicornDbgModule):
                 # iterate for every command and subcommand in args
                 for arg in args:
                     c += 1
+                    # keep a reference (usefull for errors) of command\sub_command name
+                    main_command = arg
 
                     # if we already fetched the first main command
                     if h:
@@ -156,7 +158,7 @@ class CoreModule(AbstractUnicornDbgModule):
                             h = self.core_istance.commands_map[self.core_istance.commands_map[arg]["ref"]]
                         else:
                             h = self.core_istance.commands_map[arg]
-
+                        # keep a reference to parent command
                         prev_h = h
 
                 if c > 0:
@@ -168,10 +170,11 @@ class CoreModule(AbstractUnicornDbgModule):
                     self.print_usage(args)
 
             except Exception as e:
-                print("No help for command '" + args + "'" + ' found')
+                print("No help for command '" + main_command + "'" + ' found')
                 self.print_usage(func_name)
 
         # if we have no args (so no commands) just print the commands list
+
         else:
             print("Commands list: \n")
             com_array = []
