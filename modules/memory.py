@@ -16,7 +16,7 @@ class Memory(AbstractUnicornDbgModule):
             },
             'memory': {
                 'short': 'm',
-                'usage': 'memory [dump|read|patch|write] [...]',
+                'usage': 'memory [dump|read|write] [...]',
                 'help': 'Memory operations',
                 'sub_commands': {
                     'dump': {
@@ -35,52 +35,50 @@ class Memory(AbstractUnicornDbgModule):
                             "f": "read"
                         }
                     },
-                    'patch': {
-                        'help': 'Memory write with toggles'
-                    },
                     'write': {
-                        'help': 'Memory write'
+                        'usage': 'memory write [offset] [hex payload]',
+                        'help': 'Memory write',
+                        'function': {
+                            "context": "memory_module",
+                            "f": "write"
+                        }
                     },
                 }
             }
         }
 
     def dump(self, func_name, *args):
-        if args:
-            off = utils.input_to_offset(args[0])
-            lent = utils.input_to_offset(args[1])
-            file_name = args[3]
-            b = self.core_istance.get_emu_instance().mem_read(off, lent)
-            with open(file_name, 'wb') as f:
-                f.write(b)
-            print(str(lent) + ' written to ' + file_name + '.')
+        off = utils.input_to_offset(args[0])
+        lent = utils.input_to_offset(args[1])
+        file_name = args[3]
+        b = self.core_istance.get_emu_instance().mem_read(off, lent)
+        with open(file_name, 'wb') as f:
+            f.write(b)
+        print(str(lent) + ' written to ' + file_name + '.')
 
     def read(self, func_name, *args):
-        if args:
-            off = utils.input_to_offset(args[0])
-            lent = utils.input_to_offset(args[1])
-            format = 'h'
-            if len(args) > 2:
-                format = args[2]
-            b = self.core_istance.get_emu_instance().mem_read(off, lent)
-            if format == 'h':
-                hexdump(b)
-            elif format == 'i':
-                cs = self.core_istance.get_cs_instance()
-                for i in cs.disasm(bytes(b), off):
-                    print("0x%x:\t%s\t%s" % (i.address, i.mnemonic, i.op_str))
-            else:
-                print('Format invalid. Please use a valid format:')
-                print("\t" + 'h: hex')
-                print("\t" + 'i: asm')
+        off = utils.input_to_offset(args[0])
+        lent = utils.input_to_offset(args[1])
+        format = 'h'
+        if len(args) > 2:
+            format = args[2]
+        b = self.core_istance.get_emu_instance().mem_read(off, lent)
+        if format == 'h':
+            hexdump(b)
+        elif format == 'i':
+            cs = self.core_istance.get_cs_instance()
+            for i in cs.disasm(bytes(b), off):
+                print("0x%x:\t%s\t%s" % (i.address, i.mnemonic, i.op_str))
+        else:
+            print('Format invalid. Please use a valid format:')
+            print("\t" + 'h: hex')
+            print("\t" + 'i: asm')
 
     def write(self, func_name, *args):
-        # todo
-        pass
-
-    def patch(self, func_name, *args):
-        # todo
-        pass
+        off = utils.input_to_offset(args[0])
+        pp = bytes.fromhex(args[1])
+        self.core_istance.get_emu_instance().mem_write(off, pp)
+        print(str(len(pp)) + ' written to ' + hex(off) + '.')
 
     def init(self):
         pass
