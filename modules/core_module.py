@@ -130,6 +130,7 @@ class CoreModule(AbstractUnicornDbgModule):
                 # c will keep the deep of the subcommand iteration
                 h = None
                 c = 0
+                prev_h = None
 
                 # iterate for every command and subcommand in args
                 for arg in args:
@@ -140,6 +141,8 @@ class CoreModule(AbstractUnicornDbgModule):
                         # if we have a sub_command save the reference so we can iterate into it
                         if "sub_commands" in h:
                             if len(h["sub_commands"]) is not 0:
+                                # save the parent command
+                                prev_h = h
                                 h = h["sub_commands"][arg]
                             else:
                                 raise Exception
@@ -154,7 +157,13 @@ class CoreModule(AbstractUnicornDbgModule):
                         else:
                             h = self.core_istance.commands_map[arg]
 
+                        prev_h = h
+
                 if c > 0:
+                    # if the sub_command is a reference to another associated sub_command
+                    if "ref" in h:
+                        h = prev_h['sub_commands'][h['ref']]
+
                     print(h["help"])
                     self.print_usage(args)
 
