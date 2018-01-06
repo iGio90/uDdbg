@@ -80,13 +80,15 @@ class UnicornDbgFunctions(object):
                 else:
                     possible_subcommand = None
 
+
                 # now iterate while we have a valid subcommand,
                 # when we don't find a valid subcommand exit and the new command will be the subcommand
+                # save the sub_command parent
+                prev_command = com
                 while last_function is False:
-                    # save the sub_command parent
-                    prev_command = com
                     if 'sub_commands' in com and possible_subcommand:
                         if possible_subcommand in com['sub_commands']:
+                            prev_command = com
                             com = com['sub_commands'][possible_subcommand]
                             # pop the found subcommand so we can iterate on the remanings arguments
                             args.pop(0)
@@ -125,7 +127,7 @@ class UnicornDbgFunctions(object):
             else:
                 print("Command '"+command+"' not found")
         except Exception as e:
-            print("exec Err: "+str(e)+"\n")
+            print(colored("exec Err: ", 'white', attrs=['underline', 'bold'])+e+"\n")
             self.exec_command('help', [main_command])
 
 
