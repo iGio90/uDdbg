@@ -51,7 +51,7 @@ class Memory(AbstractUnicornDbgModule):
         off = utils.input_to_offset(args[0])
         lent = utils.input_to_offset(args[1])
         file_name = args[3]
-        b = self.core_istance.get_emu_instance().mem_read(off, lent)
+        b = self.core_instance.get_emu_instance().mem_read(off, lent)
         with open(file_name, 'wb') as f:
             f.write(b)
         print(str(lent) + ' written to ' + file_name + '.')
@@ -62,11 +62,11 @@ class Memory(AbstractUnicornDbgModule):
         format = 'h'
         if len(args) > 2:
             format = args[2]
-        b = self.core_istance.get_emu_instance().mem_read(off, lent)
+        b = self.core_instance.get_emu_instance().mem_read(off, lent)
         if format == 'h':
             hexdump(b)
         elif format == 'i':
-            cs = self.core_istance.get_cs_instance()
+            cs = self.core_instance.get_cs_instance()
             for i in cs.disasm(bytes(b), off):
                 print("0x%x:\t%s\t%s" % (i.address, i.mnemonic, i.op_str))
         else:
@@ -77,7 +77,7 @@ class Memory(AbstractUnicornDbgModule):
     def write(self, func_name, *args):
         off = utils.input_to_offset(args[0])
         pp = bytes.fromhex(args[1])
-        self.core_istance.get_emu_instance().mem_write(off, pp)
+        self.core_instance.get_emu_instance().mem_write(off, pp)
         print(str(len(pp)) + ' written to ' + hex(off) + '.')
 
     def init(self):

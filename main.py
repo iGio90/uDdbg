@@ -223,6 +223,9 @@ class UnicornDbg(object):
             self.cs = Cs(a, m)
         return self.cs
 
+    def get_arch(self):
+        return self.arch
+
     def parse_command(self, text):
         """
         parse command section, here we will make first filters and checks

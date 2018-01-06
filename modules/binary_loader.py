@@ -32,8 +32,8 @@ class BinaryLoader(AbstractUnicornDbgModule):
             if binary_len % 1024 is not 0:
                 binary_len += 1024 - (binary_len % 1024)
 
-            self.core_istance.get_emu_instance().mem_map(off, binary_len)
-            self.core_istance.get_emu_instance().mem_write(off, p)
+            self.core_instance.get_emu_instance().mem_map(off, binary_len)
+            self.core_instance.get_emu_instance().mem_write(off, p)
             print('Mapped ' + str(binary_len) + ' at ' + hex(off))
         else:
             print("File not found")

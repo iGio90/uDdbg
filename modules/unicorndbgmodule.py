@@ -37,13 +37,13 @@ class AbstractUnicornDbgModule(ABC):
 
     """
 
-    def __init__(self, core_istance):
+    def __init__(self, core_instance):
         """
         define required property context_name and command_map for every module
         """
         self.command_map = None
         self.context_name = None
-        self.core_istance = core_istance
+        self.core_instance = core_instance
 
         @property
         def context_name(self):
