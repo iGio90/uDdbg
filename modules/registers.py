@@ -110,7 +110,7 @@ class Registers(AbstractUnicornDbgModule):
              utils.green_bold('DECIMAL')]
         print(tabulate(r, h, tablefmt="rst"))
 
-    def write(self):
+    def write(self, func_name, *args):
         # todo
         pass
 

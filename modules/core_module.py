@@ -29,7 +29,7 @@ class CoreModule(AbstractUnicornDbgModule):
                 'ref': "show",
             },
             'c': {
-                'ref': "start",
+                'ref': "continue",
             },
             'b': {
                 'ref': "breakpoint",
@@ -87,13 +87,13 @@ class CoreModule(AbstractUnicornDbgModule):
                     },
                 }
             },
-            'start': {
+            'continue': {
                 'short': 'c',
-                'usage': 'start',
-                'help': 'Start emulation',
+                'usage': 'continue',
+                'help': 'Start|Continue emulation',
                 'function': {
                     "context": "core_module",
-                    "f": "show"
+                    "f": "continue_exec"
                 }
             },
             'modules': {
@@ -128,9 +128,9 @@ class CoreModule(AbstractUnicornDbgModule):
 
     def help(self, func_name, *args):
         """
-        print the help and command usage of the requested command (and subcommand too)
+        print the help and command usage of the requested command (and sub_command too)
 
-        help command_to_get_help [subcommand_to_get_help1 subcommand_to_get_help2]
+        help command_to_get_help [sub_command_to_get_help1 sub_command_to_get_help2]
 
         :param func_name:
         :param args:
@@ -141,12 +141,12 @@ class CoreModule(AbstractUnicornDbgModule):
         if args:
             try:
                 # h will keep the command dictionary iteration
-                # c will keep the deep of the subcommand iteration
+                # c will keep the deep of the sub_command iteration
                 h = None
                 c = 0
                 prev_h = None
 
-                # iterate for every command and subcommand in args
+                # iterate for every command and sub_command in args
                 for arg in args:
                     c += 1
                     # keep a reference (usefull for errors) of command\sub_command name
@@ -279,6 +279,12 @@ class CoreModule(AbstractUnicornDbgModule):
             #if "help" in com_obj[com]:
                 #print("\t" + com_obj[com]["help"])
                 #print("\n")
+
+    def continue_exec(self):
+        current_address = self.core_instance.unicorndbg_instance.get_current_address()
+        if current_address == 0x0:
+            start = input("Start address: ")
+            self.core_instance.unicorndbg_instance.resume_emulation(start)
 
     def init(self):
         pass

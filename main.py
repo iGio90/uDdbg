@@ -3,7 +3,7 @@ import inquirer
 
 from capstone import *
 from modules.core_module import CoreModule
-from modules import binary_loader, memory, module_test, registers
+from modules import binary_loader, memory, module_test, registers, mappings
 from prompt_toolkit.auto_suggest import AutoSuggestFromHistory
 from prompt_toolkit.history import InMemoryHistory
 from prompt_toolkit.shortcuts import prompt
@@ -35,6 +35,9 @@ class UnicornDbgFunctions(object):
         # pass an instance of self in order to allow cores methods to get access to context_map and commands_map
         core_module_instance = CoreModule(self)
         self.add_module(core_module_instance)
+
+        mappings_module = mappings.Mappings(self)
+        self.add_module(mappings_module)
 
         binary_loader_module = binary_loader.BinaryLoader(self)
         self.add_module(binary_loader_module)
@@ -136,6 +139,9 @@ class UnicornDbgFunctions(object):
         """ expose capstone instance """
         return self.unicorndbg_instance.get_cs_instance()
 
+    def get_module(self, module_key):
+        return self.context_map[module_key]
+
     def add_module(self, module):
         """
         add a module to the core.
@@ -184,6 +190,7 @@ class UnicornDbg(object):
         self.mode = None
         self.emu_instance = None
         self.cs = None
+        self.current_address = 0x0
 
         self.history = InMemoryHistory()
 
@@ -217,6 +224,11 @@ class UnicornDbg(object):
             # send command to the parser
             self.parse_command(text)
 
+    def resume_emulation(self, address=0x0):
+        if address > 0x0:
+            self.current_address = address
+        self.emu_instance.emu_start(self.current_address)
+
     def get_emu_instance(self):
         """ expose emu instance """
         return self.emu_instance
@@ -232,6 +244,9 @@ class UnicornDbg(object):
 
     def get_arch(self):
         return self.arch
+
+    def get_current_address(self):
+        return self.current_address
 
     def parse_command(self, text):
         """

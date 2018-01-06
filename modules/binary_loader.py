@@ -19,11 +19,10 @@ class BinaryLoader(AbstractUnicornDbgModule):
         }
 
     def load(self, func_name, *args):
-        p = input("Binary path: ")
-        if os.path.isfile(p):
-            p = open(p, 'rb').read()
+        path = input("Binary path: ")
+        if os.path.isfile(path):
+            p = open(path, 'rb').read()
             off = utils.input_to_offset(input('Offset: '))
-
             binary_len = len(p)
 
             if off < 1024:
@@ -34,6 +33,7 @@ class BinaryLoader(AbstractUnicornDbgModule):
 
             self.core_instance.get_emu_instance().mem_map(off, binary_len)
             self.core_instance.get_emu_instance().mem_write(off, p)
+            self.core_instance.get_module('mappings_module').internal_add(off, binary_len, path)
             print('Mapped ' + str(binary_len) + ' at ' + hex(off))
         else:
             print("File not found")
