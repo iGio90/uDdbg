@@ -62,7 +62,7 @@ class CoreModule(AbstractUnicornDbgModule):
                     "context": "core_module",
                     "f": "breakpoint"
                 },
-                'help': 'Break the emulation at specific offset',
+                'help': 'Break the emulation at specific address',
                 'usage': 'breakpoint [address]'
             },
             'show': {
@@ -122,7 +122,7 @@ class CoreModule(AbstractUnicornDbgModule):
         """
 
         print("Loaded modules: \n")
-        for module in self.core_istance.context_map:
+        for module in self.core_instance.context_map:
             if module is not "self":
                 print("\t" + MENU_APIX + " " + colored(module, 'white', attrs=['underline', 'bold']))
 
@@ -168,10 +168,10 @@ class CoreModule(AbstractUnicornDbgModule):
                     # and save the reference. We will start the command root from here
                     else:
                         # if the requested command is a "ref" to another command, just keep the right reference
-                        if "ref" in self.core_istance.commands_map[arg]:
-                            h = self.core_istance.commands_map[self.core_istance.commands_map[arg]["ref"]]
+                        if "ref" in self.core_instance.commands_map[arg]:
+                            h = self.core_instance.commands_map[self.core_instance.commands_map[arg]["ref"]]
                         else:
-                            h = self.core_istance.commands_map[arg]
+                            h = self.core_instance.commands_map[arg]
                         # keep a reference to parent command
                         prev_h = h
 
@@ -196,7 +196,7 @@ class CoreModule(AbstractUnicornDbgModule):
         # if we have no args (so no commands) just print the commands list
         else:
             print("\nCommands list:")
-            self.print_command_list(self.core_istance.commands_map)
+            self.print_command_list(self.core_instance.commands_map)
 
     def quit(self, *args):
         """
@@ -207,9 +207,9 @@ class CoreModule(AbstractUnicornDbgModule):
         """
 
         # for every loaded module call the delete method for safe close
-        for module in self.core_istance.context_map:
+        for module in self.core_instance.context_map:
             if module is not "self":
-                self.core_istance.context_map[module].delete()
+                self.core_instance.context_map[module].delete()
         sys.exit(0)
 
     def print_usage(self, command, only_get=False):
@@ -224,7 +224,7 @@ class CoreModule(AbstractUnicornDbgModule):
         if isinstance(command, dict):
             com = command
         else:
-            com = self.core_istance.commands_map[command]
+            com = self.core_instance.commands_map[command]
 
         try:
             if "usage" in com:
