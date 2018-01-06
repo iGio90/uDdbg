@@ -90,7 +90,6 @@ class UnicornDbgFunctions(object):
                             com = com['sub_commands'][possible_subcommand]
                             # pop the found subcommand so we can iterate on the remanings arguments
                             args.pop(0)
-                            print("sub_commands")
                             command = possible_subcommand
                             # if there are arguments left
                             if len(args) > 0:
@@ -120,12 +119,13 @@ class UnicornDbgFunctions(object):
                     # if we have no method implementation of the command
                     # print the help of the command
                     # passing all the arguments list to help function
-                    self.exec_command('help', mirror_args)
+                    print([main_command]+mirror_args)
+                    self.exec_command('help', [main_command]+mirror_args)
 
             else:
                 print("Command '"+command+"' not found")
         except Exception as e:
-            print("exec Err: "+e)
+            print("exec Err: "+str(e)+"\n")
             self.exec_command('help', [main_command])
 
 
