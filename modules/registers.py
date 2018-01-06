@@ -16,7 +16,7 @@ class Registers(AbstractUnicornDbgModule):
             'registers': {
                 'short': 'r',
                 'usage': 'registers [read|write] [...]',
-                'help': 'Registers operations',
+                'help': 'Print registers summary if no args given',
                 'function': {
                     "context": "registers_module",
                     "f": "registers"
@@ -38,6 +38,7 @@ class Registers(AbstractUnicornDbgModule):
                         }
                     },
                     'read': {
+                        'short': 'r',
                         'usage': 'registers read [register]',
                         'help': 'Read specific register',
                         'function': {
@@ -111,8 +112,14 @@ class Registers(AbstractUnicornDbgModule):
         print(tabulate(r, h, tablefmt="rst"))
 
     def write(self, func_name, *args):
-        # todo
-        pass
+        arch = self.core_instance.unicorndbg_instance.get_arch()
+        if arch == UC_ARCH_ARM:
+            try:
+                register = getattr(arm_const, "UC_ARM_REG_" + str(args[0]).upper())
+                value = utils.input_to_offset(args[1])
+                self.core_instance.get_emu_instance().reg_write(register, value)
+            except Exception as e:
+                raise Exception('Register not found')
 
     def init(self):
         pass

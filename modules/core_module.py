@@ -149,7 +149,7 @@ class CoreModule(AbstractUnicornDbgModule):
                 # iterate for every command and sub_command in args
                 for arg in args:
                     c += 1
-                    # keep a reference (usefull for errors) of command\sub_command name
+                    # keep a reference (useful for errors) of command\sub_command name
                     command = arg
 
                     # if we already fetched the first main command
