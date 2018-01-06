@@ -3,7 +3,7 @@ import inquirer
 
 from capstone import *
 from modules.core_module import CoreModule
-from modules import binary_loader, memory
+from modules import binary_loader, memory, module_test
 from prompt_toolkit.auto_suggest import AutoSuggestFromHistory
 from prompt_toolkit.history import InMemoryHistory
 from prompt_toolkit.shortcuts import prompt
@@ -53,9 +53,8 @@ class UnicornDbgFunctions(object):
         :return:
         """
         try:
-
+            main_command = command
             if command in self.commands_map:
-                main_command = command
 
                 # if we found the command but has the "ref" property,
                 # so we need to reference to another object. Ex. short command q --references--> quit
@@ -108,9 +107,10 @@ class UnicornDbgFunctions(object):
                 print("'"+command+"' not found")
         except Exception as e:
             print("exec Err: "+str(e))
-            print("'" + command + "' not found")
+            self.exec_command('help', [main_command])
 
-        print(args)
+
+        #print("Debug args: %s"%args)
 
     def get_emu_instance(self):
         """ expose emu instance """
@@ -154,7 +154,6 @@ class UnicornDbgFunctions(object):
             else:
                 raise Exception("module already loaded")
         except Exception as e:
-            print(self.commands_map)
             print("Error in adding '" + context_name + "' module. Err: "+str(e))
             return False
 
@@ -262,6 +261,9 @@ def prompt_list(items, key, hint):
 
 if __name__ == "__main__":
     udbg = UnicornDbg()
+    t = module_test.MyModule(udbg)
+
+    udbg.add_module(t)
 
     arch = prompt_arch()
     mode = prompt_mode()
