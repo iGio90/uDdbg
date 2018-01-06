@@ -73,6 +73,8 @@ class UnicornDbgFunctions(object):
                 # now iterate while we have a valid subcommand,
                 # when we don't find a valid subcommand exit and the new command will be the subcommand
                 while last_function is False:
+                    # save the sub_command parent
+                    prev_command = com
                     if 'sub_commands' in com and possible_subcommand:
                         if possible_subcommand in com['sub_commands']:
                             com = com['sub_commands'][possible_subcommand]
@@ -90,6 +92,10 @@ class UnicornDbgFunctions(object):
                             last_function = True
                     else:
                         last_function = True
+
+                # if the sub_command is a reference to another associated sub_command
+                if 'ref' in com:
+                    com = prev_command['sub_commands'][com['ref']]
 
                 # if we have a function field just fetch the context and the function name,
                 # bind them and call the function passing the arguments

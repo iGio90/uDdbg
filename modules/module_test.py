@@ -11,12 +11,27 @@ class MyModule(AbstractUnicornDbgModule):
                     "context": "my_module",
                     "f": "module_test"
                 },
-                'help': 'My_module test function'
+                'help': 'HELP My_module test function',
+                'sub_commands':{
+                    'sub1':{
+                        'help':'SUB1 HELP',
+                        'function':{
+                            'context':'my_module',
+                            'f':'sub1'
+                        }
+                    },
+                    's1':{
+                        'ref':'sub1'
+                    }
+                }
             }
         }
 
     def module_test(self, func_name, *args):
         print("This is a test from my_module test function")
+
+    def sub1(self, func_name, *args):
+        print("CALL TO SUB1")
 
     def init(self):
         pass
