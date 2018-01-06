@@ -9,6 +9,7 @@ from prompt_toolkit.history import InMemoryHistory
 from prompt_toolkit.shortcuts import prompt
 from termcolor import colored
 from unicorn import *
+import traceback, sys
 
 MENU_APPENDIX = '$>'
 MENU_APIX = '[' + colored('*', 'cyan', attrs=['bold', 'dark']) + ']'
@@ -114,7 +115,7 @@ class UnicornDbgFunctions(object):
             else:
                 print("'"+command+"' not found")
         except Exception as e:
-            print("exec Err: "+str(e))
+            print("exec Err: "+e)
             self.exec_command('help', [main_command])
 
 
