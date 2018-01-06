@@ -26,7 +26,7 @@ class BinaryLoader(AbstractUnicornDbgModule):
 
             binary_len = len(p)
 
-            if off % 1024 is not 0:
+            if off < 1024:
                 off += 1024 - (off % 1024)
 
             if binary_len % 1024 is not 0:
