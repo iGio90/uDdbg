@@ -55,8 +55,12 @@ class UnicornDbgFunctions(object):
         :param args: arguments array
         :return:
         """
+        mirror_args = args
         try:
             main_command = command
+            if main_command == '':
+                return
+
             if command in self.commands_map:
 
                 # if we found the command but has the "ref" property,
@@ -110,10 +114,13 @@ class UnicornDbgFunctions(object):
                     # and possible arguments to the function
                     call_method(command, *args)
                 else:
-                    self.exec_command('help',[main_command])
+                    # if we have no method implementation of the command
+                    # print the help of the command
+                    # passing all the arguments list to help function
+                    self.exec_command('help', mirror_args)
 
             else:
-                print("'"+command+"' not found")
+                print("Command '"+command+"' not found")
         except Exception as e:
             print("exec Err: "+e)
             self.exec_command('help', [main_command])
