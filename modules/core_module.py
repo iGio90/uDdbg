@@ -1,6 +1,7 @@
 from modules.unicorndbgmodule import AbstractUnicornDbgModule
 from termcolor import colored
 import sys
+from tabulate import tabulate
 
 MENU_APIX = '[' + colored('*', 'cyan', attrs=['bold', 'dark']) + ']'
 
@@ -166,28 +167,23 @@ class CoreModule(AbstractUnicornDbgModule):
                     if "ref" in h:
                         h = prev_h['sub_commands'][h['ref']]
 
+                    # print help and usage passing h, the command object reference
                     print(h["help"])
-                    self.print_usage(args)
+                    self.print_usage(h)
+                    # if there are sub_commands print a list of them
+                    if "sub_commands" in h:
+                        print("\nSub commands list:")
+                        self.print_command_list(h["sub_commands"])
 
             except Exception as e:
+                print("search Err: " + str(e))
                 print("No help for command '" + main_command + "'" + ' found')
                 self.print_usage(func_name)
 
         # if we have no args (so no commands) just print the commands list
-
         else:
-            print("Commands list: \n")
-            com_array = []
-            for com in self.core_istance.commands_map:
-                have_shorts = "short" in self.core_istance.commands_map[com]
-                if not have_shorts and "ref" not in self.core_istance.commands_map[com]:
-                    com_array.append(com)
-                elif have_shorts:
-                    com_array.append(com + " (" + self.core_istance.commands_map[com]["short"] + ")")
-
-            com_array.sort()
-            for com in com_array:
-                print("\t" + com)
+            print("\nCommands list:")
+            self.print_command_list(self.core_istance.commands_map)
 
     def quit(self, *args):
         """
@@ -203,18 +199,72 @@ class CoreModule(AbstractUnicornDbgModule):
                 self.core_istance.context_map[module].delete()
         sys.exit(0)
 
-    def print_usage(self, command):
+    def print_usage(self, command, only_get=False):
         """
         utils function to check (if exist) and print the command usage
 
         :param command: command of which to print usage description
+        :param only_get: if True he will not print the usage but only returns it
+        :return:
+        """
+
+        if isinstance(command, dict):
+            com = command
+        else:
+            com = self.core_istance.commands_map[command]
+
+        try:
+            if "usage" in com:
+                if only_get is False:
+                    print("Usage: " + com["usage"])
+                return com["usage"]
+            else:
+                return None
+        except Exception as e:
+            return None
+
+    def print_command_list(self, com_obj):
+        """
+        print the command list of the com_obj reference passed (could be root or even a sub_command reference)
+        :param com_obj: command object reference
         :return:
         """
         try:
-            if "usage" in self.core_istance.commands_map[command]:
-                print("Usage: " + self.core_istance.commands_map[command]["usage"])
+            com_array = []
+            for com in com_obj:
+                # if a short reference is present print (short)
+                # if the command is a ref, ignore it
+                if "ref" not in com_obj[com]:
+                    com_array.append(com)
+
+
+            # sort the list of commands and print it
+            com_array.sort()
+            command_table_arr = []
+            for com in com_array:
+                com_t = []
+                com_t.append(com)
+                have_shorts = "short" in com_obj[com]
+                if have_shorts:
+                    com_t.append(com_obj[com]["short"])
+                else:
+                    com_t.append('')
+
+                com_t.append(self.print_usage(com_obj[com], only_get=True))
+                command_table_arr.append(com_t)
+
+            print(tabulate(command_table_arr, ['command', 'short', 'usage'], tablefmt="rst"))
+
         except Exception as e:
-            return
+            print("command_list err:"+e)
+
+                #print("\t" + colored(com + " (" + com_obj[com]["short"] + ")", 'white', attrs=['underline', 'bold']))
+            #else:
+                #print("\t" + colored(com, 'white', attrs=['underline', 'bold']))
+
+            #if "help" in com_obj[com]:
+                #print("\t" + com_obj[com]["help"])
+                #print("\n")
 
     def init(self):
         pass
