@@ -12,6 +12,14 @@ def input_to_offset(off):
         raise Exception('Invalid integer')
 
 
+def white_bold(text):
+    return colored(text, attrs=['bold', 'dark'])
+
+
+def white_bold_underline(text):
+    return colored(text, attrs=['dark', 'bold', 'underline'])
+
+
 def green_bold(text):
     return colored(text, 'green', attrs=['bold', 'dark'])
 
