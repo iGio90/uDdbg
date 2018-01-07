@@ -266,7 +266,6 @@ class UnicornDbg(object):
         self.emu_instance.hook_add(UC_HOOK_CODE, self.dbg_hooks)
 
         main_apix = colored(MENU_APPENDIX + " ", 'red', attrs=['bold', 'dark'])
-        udbg.batch_execution([])
         while True:
             print(main_apix, end='', flush=False)
             text = prompt('', history=self.history, auto_suggest=AutoSuggestFromHistory())
