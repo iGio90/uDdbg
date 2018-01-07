@@ -8,17 +8,12 @@ import re
 
 
 def error_format(command, text):
-    return colored("ERR", 'red', attrs=['bold', 'underline']) + "(" + colored(command, 'white', attrs=['bold', 'underline']) + "): " + text
+    return colored("ERR", 'red', attrs=['bold', 'underline']) + "(" + \
+           colored(command, 'white', attrs=['bold', 'underline']) + "): " + text
 
 
 def input_to_offset(off):
-    try:
-        if off.startswith('0x'):
-            return int(off, 16)
-        else:
-            return int(off)
-    except Exception as e:
-        raise Exception('Invalid integer')
+    return int(eval(off))
 
 
 def white_bold(text):
@@ -75,6 +70,7 @@ def prompt_list(items, key, hint):
     r = inquirer.prompt(base_path)
     return r[key]
 
+
 def prompt_arch():
     items = [k for k, v in unicorn_const.__dict__.items() if not k.startswith("__") and k.startswith("UC_ARCH")]
     return prompt_list(items, 'arch', 'Select arch')
@@ -128,6 +124,3 @@ def check_args(pattern, args):
             return False, "arg " + str(i) + " should be " + p_arr[i] + " type"
 
     return True, None
-
-
-
