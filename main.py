@@ -5,7 +5,7 @@ from capstone import *
 
 import utils
 from modules.core_module import CoreModule
-from modules import binary_loader, memory, module_test, registers, mappings, patches, asm
+from modules import binary_loader, memory, module_test, registers, mappings, patches, asm, configs
 from prompt_toolkit.auto_suggest import AutoSuggestFromHistory
 from prompt_toolkit.history import InMemoryHistory
 from prompt_toolkit.shortcuts import prompt
@@ -63,6 +63,9 @@ class UnicornDbgFunctions(object):
 
         asm_module = asm.ASM(self)
         self.add_module(asm_module)
+
+        configs_module = configs.Configs(self)
+        self.add_module(configs_module)
 
     def exec_command(self, command, args):
         """
@@ -286,6 +289,7 @@ class UnicornDbg(object):
     def start(self, arch, mode):
         self.arch = getattr(unicorn_const, arch)
         self.mode = getattr(unicorn_const, mode)
+
         self.emu_instance = Uc(self.arch, self.mode)
 
         # add hooks
@@ -314,10 +318,28 @@ class UnicornDbg(object):
         """ expose capstone instance """
         if self.cs is None:
             print('\nSetup capstone engine.')
-            self.cs_arch = getattr(capstone, prompt_cs_arch())
-            self.cs_mode = getattr(capstone, prompt_cs_mode())
+            if self.cs_arch is None:
+                arch = prompt_cs_arch()
+                self.cs_arch = getattr(capstone, arch)
+                self.functions_instance.get_module('configs_module').push_config('cs_arch', arch)
+
+            mode = prompt_cs_mode()
+            self.cs_mode = getattr(capstone, mode)
+
+            self.functions_instance.get_module('configs_module').push_config('cs_mode', mode)
+
             self.cs = Cs(self.cs_arch, self.cs_mode)
         return self.cs
+
+    def set_cs_arch(self, arch):
+        self.cs_arch = arch
+        if self.cs_mode is not None:
+            self.cs = Cs(self.cs_arch, self.cs_mode)
+
+    def set_cs_mode(self, mode):
+        self.cs_mode = mode
+        if self.cs_arch is not None:
+            self.cs = Cs(self.cs_arch, self.cs_mode)
 
     def get_arch(self):
         return self.arch
@@ -333,6 +355,9 @@ class UnicornDbg(object):
 
     def get_current_address(self):
         return self.current_address
+
+    def get_module(self, module_key):
+        return self.functions_instance.get_module(module_key)
 
     def batch_execution(self, commands):
         self.functions_instance.batch_execution(commands)
