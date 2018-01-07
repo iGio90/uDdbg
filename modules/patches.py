@@ -82,7 +82,6 @@ class Patches(AbstractUnicornDbgModule):
         for i in range(0, len(self.patches)):
             p = self.patches[i]
             if p[0] == off:
-                self.patches.pop(i)
                 print(hex(off) + ' already patched')
                 return
 
@@ -102,8 +101,29 @@ class Patches(AbstractUnicornDbgModule):
                 return
         print('no patch found at ' + hex(off))
 
-    def toggle(self, address, length, path=None):
-        pass
+    def toggle(self, func_name, *args):
+        off = utils.input_to_offset(args[0])
+        for i in range(0, len(self.patches)):
+            p = self.patches[i]
+            if p[0] == off:
+                tog = args[1]
+                status = p[4]
+
+                memory_module = self.core_instance.get_module('memory_module')
+
+                if status == 0 and tog == 1:
+                    p[4] = tog
+                    memory_module.internal_write[off, p[3]]
+                    print('patch at ' + hex(off) + ' enabled')
+                    return
+                elif status == 1 and tog == 0:
+                    p[4] = tog
+                    memory_module.internal_write[off, p[2]]
+                    print('patch at ' + hex(off) + ' disabled')
+                    return
+            print('Nothing to do at ' + hex(off))
+            return
+        print('no patch found at ' + hex(off))
 
     def init(self):
         pass
