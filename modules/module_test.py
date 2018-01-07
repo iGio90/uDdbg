@@ -1,5 +1,5 @@
 from modules.unicorndbgmodule import AbstractUnicornDbgModule
-
+import utils
 
 class MyModule(AbstractUnicornDbgModule):
     def __init__(self, core_instance):
@@ -29,6 +29,8 @@ class MyModule(AbstractUnicornDbgModule):
 
     def module_test(self, func_name, *args):
         print("This is a test from my_module test function")
+        print(utils.check_args("int int hex str",args))
+
 
     def sub1(self, func_name, *args):
         print("CALL TO SUB1")

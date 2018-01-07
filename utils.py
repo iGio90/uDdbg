@@ -4,10 +4,12 @@ from unicorn import *
 import capstone
 from capstone import *
 from unicorn import unicorn_const
+import re
 
 
 def error_format(command, text):
     return colored("ERR", 'red', attrs=['bold', 'underline']) + "(" + colored(command, 'white', attrs=['bold', 'underline']) + "): " + text
+
 
 def input_to_offset(off):
     try:
@@ -91,3 +93,41 @@ def prompt_cs_arch():
 def prompt_cs_mode():
     items = [k for k, v in capstone.__dict__.items() if not k.startswith("__") and k.startswith("CS_MODE")]
     return prompt_list(items, 'mode', 'Select mode')
+
+
+def check_args(pattern, args):
+    """
+    check that args array matches the pattern type and args len
+    :param pattern: string with args type pattern. [int|str|hex], Ex. int int hex.
+    :param args: args array to check
+    :return:
+    """
+    # get the pattern array
+    p_arr = pattern.split(' ')
+
+    # if args len doesn't match with the pattern
+    if len(p_arr) != len(args):
+        return False, "args len doesn't match"
+
+    # int str hex
+    for i, arg in enumerate(args):
+        if arg == '':
+            return False, "arg " + str(i) + " is empty"
+
+        # select the right regex for the pattern
+        if p_arr[i] == "int":
+            reg = r"\d+"
+        elif p_arr[i] == "str":
+            reg = r".+"
+        elif p_arr[i] == "hex":
+            reg = r"0x\d+"
+        else:
+            return False, "pattern " + str(i) + " wrong type"
+
+        if re.match(reg, arg) is None:
+            return False, "arg " + str(i) + " should be " + p_arr[i] + " type"
+
+    return True, None
+
+
+
