@@ -32,7 +32,11 @@ class UnicornDbgFunctions(object):
         self.unicorndbg_instance = unicorndbg_instance
 
         # load modules
-        self.load_modules()
+        try:
+            self.load_modules()
+        except Exception as e:
+            print(e)
+            self.quit()
 
     def load_modules(self):
         core_module_instance = CoreModule(self)
@@ -156,11 +160,12 @@ class UnicornDbgFunctions(object):
         :param module: class instance of the module
         :return:
         """
+        context_name = module.get_context_name()
+        command_map = module.get_command_map()
+
         try:
             # get the context_name (or module name) and the command_map from the module.
             # These 2 functions are ensured by class inheritance of UnicornDbgModule
-            context_name = module.get_context_name()
-            command_map = module.get_command_map()
 
             # check if is all valid and if we have not already loaded it
             if context_name not in self.commands_map and context_name not in self.context_map and len(command_map) \
@@ -171,20 +176,17 @@ class UnicornDbgFunctions(object):
                 for com in command_map:
                     if com in self.commands_map:
                         raise Exception('command "' + com + '" already exist')
-                    else:
-                        self.commands_map[com] = command_map[com]
 
+                self.commands_map.update(command_map)
                 self.context_map[context_name] = module
 
                 print(MENU_APIX + " Module " + colored(context_name, 'white', attrs=['underline', 'bold']) + " loaded")
                 # call the module init function
                 module.init()
-                return True
             else:
                 raise Exception("module already loaded")
         except Exception as e:
-            print("Error in adding '" + context_name + "' module. Err: " + str(e))
-            return False
+            raise Exception("Error in adding '" + context_name + "' module.\nErr: " + str(e))
 
     def batch_execution(self, commands_arr):
         """
@@ -216,6 +218,20 @@ class UnicornDbgFunctions(object):
 
         except AttributeError as e:
             print('error in parsing command')
+
+    def quit(self):
+        """
+        exit function, here goes all the handles in order to clean quit the system
+
+        :param args:
+        :return:
+        """
+
+        # for every loaded module call the delete method for safe close
+        for module in self.context_map:
+            if module is not "self":
+                self.context_map[module].delete()
+        sys.exit(0)
 
 
 class UnicornDbg(object):
@@ -266,7 +282,6 @@ class UnicornDbg(object):
         self.emu_instance.hook_add(UC_HOOK_CODE, self.dbg_hooks)
 
         main_apix = colored(MENU_APPENDIX + " ", 'red', attrs=['bold', 'dark'])
-        udbg.batch_execution([])
         while True:
             print(main_apix, end='', flush=False)
             text = prompt('', history=self.history, auto_suggest=AutoSuggestFromHistory())
@@ -302,6 +317,7 @@ class UnicornDbg(object):
 
     def batch_execution(self, commands):
         self.functions_instance.batch_execution(commands)
+
 
 
 def prompt_arch():
