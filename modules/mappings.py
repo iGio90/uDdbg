@@ -34,7 +34,7 @@ class Mappings(AbstractUnicornDbgModule):
                         }
                     },
                     'map': {
-                        'usage': 'map [address] [length]',
+                        'usage': 'map [address] [length] [optional: map name]',
                         'help': 'Map *length at *address',
                         'function': {
                             "context": "mappings_module",
@@ -54,14 +54,17 @@ class Mappings(AbstractUnicornDbgModule):
         }
 
     def list(self, func_name, *args):
-        h = [utils.green_bold('PATH'),
-             utils.green_bold('ADDRESS'),
-             utils.green_bold('LENGTH')]
-        print(tabulate(self.mappings, h, tablefmt="rst"))
+        h = [utils.green_bold('path'),
+             utils.green_bold('address'),
+             utils.green_bold('length')]
+        print(tabulate(self.mappings, h, tablefmt="simple"))
 
     def map(self, func_name, *args):
         off = utils.input_to_offset(args[0])
         lent = utils.input_to_offset(args[1])
+        p = None
+        if len(args) > 2:
+            p = str(args[2])
 
         if off < 1024:
             off += 1024 - (off % 1024)
@@ -70,6 +73,7 @@ class Mappings(AbstractUnicornDbgModule):
             lent += 1024 - (lent % 1024)
 
         self.core_instance.get_emu_instance().mem_map(off, lent)
+        self.internal_add(off, lent, p)
         print('Mapped ' + str(lent) + ' at ' + hex(off))
 
     def unmap(self, func_name, *args):
@@ -83,6 +87,12 @@ class Mappings(AbstractUnicornDbgModule):
             lent += 1024 - (lent % 1024)
 
         self.core_instance.get_emu_instance().mem_unmap(off, lent)
+        for i in range(0, len(self.mappings)):
+            if self.mappings[i][1] == off:
+                map_lent = self.mappings[i][2]
+                if map_lent == lent:
+                    self.mappings.pop(i)
+
         print('Unmapped ' + str(lent) + ' at ' + hex(off))
 
     def internal_add(self, address, length, path=None):

@@ -3,7 +3,7 @@ import inquirer
 
 from capstone import *
 from modules.core_module import CoreModule
-from modules import binary_loader, memory, module_test, registers, mappings
+from modules import binary_loader, memory, module_test, registers, mappings, patches
 from prompt_toolkit.auto_suggest import AutoSuggestFromHistory
 from prompt_toolkit.history import InMemoryHistory
 from prompt_toolkit.shortcuts import prompt
@@ -31,8 +31,10 @@ class UnicornDbgFunctions(object):
         self.commands_map = {}
         self.unicorndbg_instance = unicorndbg_instance
 
-        # create a core_module instance (with all core commands and functionality) and load them
-        # pass an instance of self in order to allow cores methods to get access to context_map and commands_map
+        # load modules
+        self.load_modules()
+
+    def load_modules(self):
         core_module_instance = CoreModule(self)
         self.add_module(core_module_instance)
 
@@ -47,6 +49,9 @@ class UnicornDbgFunctions(object):
 
         registers_module = registers.Registers(self)
         self.add_module(registers_module)
+
+        patches_module = patches.Patches(self)
+        self.add_module(patches_module)
 
     def exec_command(self, command, args):
         """
@@ -76,29 +81,28 @@ class UnicornDbgFunctions(object):
                 # if we have no arguments no sub_command exist, else save the first argument
                 last_function = False
                 if len(args) > 0:
-                    possible_subcommand = args[0]
+                    possible_sub_command = args[0]
                 else:
-                    possible_subcommand = None
+                    possible_sub_command = None
 
-
-                # now iterate while we have a valid subcommand,
-                # when we don't find a valid subcommand exit and the new command will be the subcommand
+                # now iterate while we have a valid sub_command,
+                # when we don't find a valid sub_command exit and the new command will be the sub_command
                 # save the sub_command parent
                 prev_command = com
                 while last_function is False:
                     # if the sub command is a ref, catch the right command
                     if 'ref' in com:
                         com = prev_command['sub_commands'][com['ref']]
-                    if 'sub_commands' in com and possible_subcommand:
-                        if possible_subcommand in com['sub_commands']:
+                    if 'sub_commands' in com and possible_sub_command:
+                        if possible_sub_command in com['sub_commands']:
                             prev_command = com
-                            com = com['sub_commands'][possible_subcommand]
-                            # pop the found subcommand so we can iterate on the remanings arguments
+                            com = com['sub_commands'][possible_sub_command]
+                            # pop the found sub_command so we can iterate on the remanings arguments
                             args.pop(0)
-                            command = possible_subcommand
+                            command = possible_sub_command
                             # if there are arguments left
                             if len(args) > 0:
-                                possible_subcommand = args[0]
+                                possible_sub_command = args[0]
                             else:
                                 last_function = True
                         else:
@@ -123,17 +127,16 @@ class UnicornDbgFunctions(object):
                     # if we have no method implementation of the command
                     # print the help of the command
                     # passing all the arguments list to help function
-                    print([main_command]+mirror_args)
-                    self.exec_command('help', [main_command]+mirror_args)
+                    print([main_command] + mirror_args)
+                    self.exec_command('help', [main_command] + mirror_args)
 
             else:
-                print("Command '"+command+"' not found")
+                print("Command '" + command + "' not found")
         except Exception as e:
-            print(colored("exec Err:", 'white', attrs=['underline', 'bold'])+" "+str(e)+"\n")
+            print(colored("exec Err:", 'white', attrs=['underline', 'bold']) + " " + str(e) + "\n")
             self.exec_command('help', [main_command])
 
-
-        #print("Debug args: %s"%args)
+        # print("Debug args: %s"%args)
 
     def get_emu_instance(self):
         """ expose emu instance """
@@ -167,20 +170,20 @@ class UnicornDbgFunctions(object):
                 # check if command already exist in the command map, if yes trigger error for the module load
                 for com in command_map:
                     if com in self.commands_map:
-                        raise Exception('Command "'+com+'" already exist')
+                        raise Exception('Command "' + com + '" already exist')
                     else:
                         self.commands_map[com] = command_map[com]
 
                 self.context_map[context_name] = module
 
-                print(MENU_APIX+" Module "+colored(context_name, 'white', attrs=['underline', 'bold'])+" loaded")
+                print(MENU_APIX + " Module " + colored(context_name, 'white', attrs=['underline', 'bold']) + " loaded")
                 # call the module init function
                 module.init()
                 return True
             else:
                 raise Exception("module already loaded")
         except Exception as e:
-            print("Error in adding '" + context_name + "' module. Err: "+str(e))
+            print("Error in adding '" + context_name + "' module. Err: " + str(e))
             return False
 
     def batch_execution(self, commands_arr):
@@ -340,4 +343,3 @@ if __name__ == "__main__":
     mode = prompt_mode()
 
     udbg.start(arch, mode)
-

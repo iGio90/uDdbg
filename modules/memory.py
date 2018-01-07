@@ -19,7 +19,17 @@ class Memory(AbstractUnicornDbgModule):
                 'usage': 'memory [dump|read|write] [...]',
                 'help': 'Memory operations',
                 'sub_commands': {
+                    'd': {
+                        'ref': "dump",
+                    },
+                    'r': {
+                        'ref': "read",
+                    },
+                    'w': {
+                        'ref': "write",
+                    },
                     'dump': {
+                        'short': 'd',
                         'usage': 'memory dump [offset] [length] [file path]',
                         'help': 'Dump memory',
                         'function': {
@@ -28,6 +38,7 @@ class Memory(AbstractUnicornDbgModule):
                         }
                     },
                     'read': {
+                        'short': 'r',
                         'usage': 'memory read [offset] [length] [optional format: h|i]',
                         'help': 'Read memory',
                         'function': {
@@ -36,6 +47,7 @@ class Memory(AbstractUnicornDbgModule):
                         }
                     },
                     'write': {
+                        'short': 'w',
                         'usage': 'memory write [offset] [hex payload]',
                         'help': 'Memory write',
                         'function': {
