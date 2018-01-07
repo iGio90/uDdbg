@@ -31,6 +31,14 @@ All the things which came useful for the new CoC encryption reverse engineering 
 
 ***
 
+> **configs**
+>
+> print list of configs.
+>
+>     configs
+
+***
+
 > **continue**
 >
 > *c*
@@ -139,6 +147,15 @@ All the things which came useful for the new CoC encryption reverse engineering 
 > Manage registers or list main registers if no args.
 >
 >     registers [read|write]
+>
+
+***
+
+> **set**
+>
+> set configuration.
+>
+>     set *config_name *value
 >
 
 ***
