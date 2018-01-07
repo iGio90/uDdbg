@@ -78,6 +78,14 @@ class Patches(AbstractUnicornDbgModule):
         off = utils.input_to_offset(args[0])
         pp = bytes.fromhex(args[1])
         pp_len = len(pp)
+
+        for i in range(0, len(self.patches)):
+            p = self.patches[i]
+            if p[0] == off:
+                self.patches.pop(i)
+                print(hex(off) + ' already patched')
+                return
+
         memory_module = self.core_instance.get_module('memory_module')
         orig_pp = memory_module.internal_read(off, pp_len)
         memory_module.internal_write(off, pp)
