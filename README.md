@@ -9,4 +9,151 @@ All the modules are accessible and have a command set which allow to interact wi
 
 All the things which came useful for the new CoC encryption reverse engineering will be some of the core feature of the tool in order to allow an easily understanding of complex and obfuscated functions.
 
-type ``help`` or ``help [any command]`` to have an idea.
+# Commands doc
+
+> **breakpoint**
+>
+> *b, bkp, break*
+>
+> break the emulation at specific address.
+>
+>     break *address
+
+***
+
+> **continue**
+>
+> *c*
+>
+> start / continue emulation.
+>
+>     continue
+
+***
+
+> **delete**
+>
+> *d*
+>
+> remove breakpoint at address.
+>
+>     d *address
+
+***
+
+> **help**
+>
+> *h*
+>
+> print specific command help or general if none provided.
+>
+>     help [*cmd]
+
+***
+
+> **load**
+>
+> *lb*
+>
+> load and map binary from file.
+>
+>     load *path *offset
+
+***
+
+> **map**
+>
+> manage mappings.
+>
+>     map [list|map|unamp]
+>
+
+***
+
+> **memory**
+>
+> *m*
+>
+> memory operations.
+>
+>     memory [dump|read|write]
+>
+
+***
+
+> **modules**
+>
+> list enabled modules.
+>
+>     modules
+>
+
+***
+
+> **patch**
+>
+> *p*
+>
+> manage patches.
+>
+>     patch [list|add|remove|toggle]
+>
+
+***
+
+> **quit**
+>
+> *q*
+>
+> quit udbg.
+>
+>     quit
+>
+
+***
+
+> **registers**
+>
+> *r, reg, regs*
+>
+> Manage registers or list main registers if no args.
+>
+>     registers [read|write]
+>
+
+***
+
+# Sub command examples
+
+Some of the main command listed above have nested commands, I.E memory
+
+> **memory**
+>
+> *m*
+>
+> memory operations.
+>
+>     memory [dump|read|write]
+>
+
+Using ``help memory`` or any other command will print an help of the nested commands:
+
+    Help for: memory
+    memory operations
+    usage: memory [dump|read|write] [...]
+
+    command    short    usage
+    ---------  -------  ----------------------------------------------------
+    dump       d        memory dump *offset *length *file_path
+    read       r        memory read *offset *length [format: h|i]
+    write      w        memory write *offset *hex_payload
+
+Nested commands have shortcuts as well so:
+
+```memory write 0x10000 0x00BF```
+
+is equal to:
+
+```m w 0x10000 0x00BF```
+
+## Have fun!

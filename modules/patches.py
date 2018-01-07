@@ -41,15 +41,15 @@ class Patches(AbstractUnicornDbgModule):
                         }
                     },
                     'add': {
-                        'usage': 'add [address] [hex payload]',
-                        'help': 'write *payload into *address',
+                        'usage': 'add *address *hex_payload',
+                        'help': 'write *hex_payload into *address',
                         'function': {
                             "context": "patches_module",
                             "f": "add"
                         }
                     },
                     'remove': {
-                        'usage': 'remove [address]',
+                        'usage': 'remove *address',
                         'help': 'remove active patch at *address',
                         'function': {
                             "context": "patches_module",
@@ -57,7 +57,7 @@ class Patches(AbstractUnicornDbgModule):
                         }
                     },
                     'toggle': {
-                        'usage': 'toggle [address]',
+                        'usage': 'toggle *address *status (0: off / 1: on)',
                         'help': 'toggle patch at *address',
                         'function': {
                             "context": "patches_module",

@@ -39,7 +39,7 @@ class Registers(AbstractUnicornDbgModule):
                     },
                     'write': {
                         'short': 'w',
-                        'usage': 'registers write [register] [value]',
+                        'usage': 'registers write *register (i.e r0) *value',
                         'help': 'write value into registers',
                         'function': {
                             "context": "registers_module",
@@ -48,7 +48,7 @@ class Registers(AbstractUnicornDbgModule):
                     },
                     'read': {
                         'short': 'r',
-                        'usage': 'registers read [register]',
+                        'usage': 'registers read *register (i.e r0)',
                         'help': 'read specific register',
                         'function': {
                             "context": "registers_module",

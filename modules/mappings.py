@@ -34,7 +34,7 @@ class Mappings(AbstractUnicornDbgModule):
                         }
                     },
                     'map': {
-                        'usage': 'map [address] [length] [optional: map name]',
+                        'usage': 'map *address *length [map name]',
                         'help': 'map *length at *address',
                         'function': {
                             "context": "mappings_module",

@@ -45,6 +45,9 @@ class CoreModule(AbstractUnicornDbgModule):
             'd': {
                 'ref': "delete",
             },
+            'h': {
+                'ref': "help",
+            },
             'quit': {
                 'short': 'q',
                 'function': {
@@ -54,6 +57,7 @@ class CoreModule(AbstractUnicornDbgModule):
                 'help': 'quit command'
             },
             'help': {
+                'short': 'h',
                 'function': {
                     "context": "core_module",
                     "f": "help"
@@ -68,7 +72,7 @@ class CoreModule(AbstractUnicornDbgModule):
                     "f": "breakpoint"
                 },
                 'help': 'break the emulation at specific address',
-                'usage': 'breakpoint [address]'
+                'usage': 'breakpoint *address'
             },
             'delete': {
                 'short': 'd',
@@ -77,7 +81,7 @@ class CoreModule(AbstractUnicornDbgModule):
                     "f": "rm_breakpoint"
                 },
                 'help': 'remove breakpoint',
-                'usage': 'delete [address]'
+                'usage': 'delete *address'
             },
             'continue': {
                 'short': 'c',

@@ -9,7 +9,11 @@ class BinaryLoader(AbstractUnicornDbgModule):
         AbstractUnicornDbgModule.__init__(self, core_instance)
         self.context_name = "binary_loader"
         self.command_map = {
+            'lb': {
+                'ref': "load",
+            },
             "load": {
+                'short': 'lb',
                 'function': {
                     "context": "binary_loader",
                     "f": "load"
@@ -19,10 +23,10 @@ class BinaryLoader(AbstractUnicornDbgModule):
         }
 
     def load(self, func_name, *args):
-        path = input("binary path: ")
+        path = args[0]
         if os.path.isfile(path):
             p = open(path, 'rb').read()
-            off = utils.input_to_offset(input('Offset: '))
+            off = utils.input_to_offset(args[1])
             binary_len = len(p)
 
             if off < 1024:
