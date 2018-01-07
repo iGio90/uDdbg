@@ -11,6 +11,8 @@ class ASM(AbstractUnicornDbgModule):
 
         # we can hold keystone instance here
         self.keystone_instance = None
+        self.ks_arch = None
+        self.ks_mode = None
 
         self.context_name = "asm_module"
         self.command_map = {
@@ -30,7 +32,7 @@ class ASM(AbstractUnicornDbgModule):
                     "f": "assemble"
                 },
                 'help': 'assemble instructions',
-                'usage': 'asm *instructions (\'mov r1, r3;add r0, r3, r2\') [! (will trigger arch/mode config)]'
+                'usage': 'asm *instructions (\'mov r1, r3;add r0, r3\') [! (reset config)]'
             },
             'disassemble': {
                 'short': 'dis,disasm',
@@ -50,6 +52,8 @@ class ASM(AbstractUnicornDbgModule):
         i = 0
         while i < len(args):
             a = str(args[i])
+            if i == 0 and (not a.startswith("'") or not a.startswith('"')):
+                raise Exception('provide a valid instruction set')
             if a.startswith("'") or a.startswith('"'):
                 a = a[1:]
             b = False
@@ -67,9 +71,13 @@ class ASM(AbstractUnicornDbgModule):
             self.keystone_instance = None
 
         if self.keystone_instance is None:
-            arch = getattr(keystone, self.prompt_ks_arch())
-            mode = getattr(keystone, self.prompt_ks_mode())
-            self.keystone_instance = keystone.Ks(arch, mode)
+            self.ks_arch = getattr(keystone, self.prompt_ks_arch())
+            self.ks_mode = getattr(keystone, self.prompt_ks_mode())
+
+            self.core_instance.get_module('configs_module').push_config('ks_arch', self.ks_arch)
+            self.core_instance.get_module('configs_module').push_config('ks_mode', self.ks_mode)
+
+            self.keystone_instance = keystone.Ks(self.ks_arch, self.ks_mode)
         try:
             encoding, count = self.keystone_instance.asm(instr)
             h = ''
@@ -108,6 +116,16 @@ class ASM(AbstractUnicornDbgModule):
     def prompt_ks_mode(self):
         items = [k for k, v in keystone.__dict__.items() if not k.startswith("__") and k.startswith("KS_MODE")]
         return utils.prompt_list(items, 'mode', 'Select mode')
+
+    def set_ks_arch(self, arch):
+        self.ks_arch = arch
+        if self.ks_mode is not None:
+            self.keystone_instance = keystone.Ks(self.ks_arch, self.ks_mode)
+
+    def set_ks_mode(self, mode):
+        self.ks_mode = mode
+        if self.ks_arch is not None:
+            self.keystone_instance = keystone.Ks(self.ks_arch, self.ks_mode)
 
     def init(self):
         pass
