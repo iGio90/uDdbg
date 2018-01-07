@@ -2,8 +2,10 @@ import capstone
 import inquirer
 
 from capstone import *
+
+import utils
 from modules.core_module import CoreModule
-from modules import binary_loader, memory, module_test, registers, mappings, patches
+from modules import binary_loader, memory, module_test, registers, mappings, patches, asm
 from prompt_toolkit.auto_suggest import AutoSuggestFromHistory
 from prompt_toolkit.history import InMemoryHistory
 from prompt_toolkit.shortcuts import prompt
@@ -58,6 +60,9 @@ class UnicornDbgFunctions(object):
 
         patches_module = patches.Patches(self)
         self.add_module(patches_module)
+
+        asm_module = asm.ASM(self)
+        self.add_module(asm_module)
 
     def exec_command(self, command, args):
         """
@@ -197,13 +202,15 @@ class UnicornDbgFunctions(object):
         """
         try:
             if len(commands_arr) > 0:
-                print(MENU_APIX + colored(" Batch execution of "+str(len(commands_arr))+" commands", 'white', attrs=['underline', 'bold']))
+                print(MENU_APIX + colored(" Batch execution of " + str(len(commands_arr)) + " commands", 'white',
+                                          attrs=['underline', 'bold']))
                 for com in commands_arr:
                     self.parse_command(com)
             else:
                 raise Exception
         except Exception as e:
-            print(MENU_APIX+" "+colored("FAILED", 'red', attrs=['underline', 'bold']) +" "+ colored("batch execution of " + str(len(commands_arr)) + " commands", 'white',attrs=['underline', 'bold']))
+            print(MENU_APIX + " " + colored("FAILED", 'red', attrs=['underline', 'bold']) + " " + colored(
+                "batch execution of " + str(len(commands_arr)) + " commands", 'white', attrs=['underline', 'bold']))
 
     def parse_command(self, text):
         """
@@ -243,6 +250,8 @@ class UnicornDbg(object):
     def __init__(self, module_arr=None):
         self.arch = None
         self.mode = None
+        self.cs_arch = None
+        self.cs_mode = None
         self.emu_instance = None
         self.cs = None
         self.current_address = 0x0
@@ -305,13 +314,22 @@ class UnicornDbg(object):
         """ expose capstone instance """
         if self.cs is None:
             print('\nSetup capstone engine.')
-            a = getattr(capstone, prompt_cs_arch())
-            m = getattr(capstone, prompt_cs_mode())
-            self.cs = Cs(a, m)
+            self.cs_arch = getattr(capstone, prompt_cs_arch())
+            self.cs_mode = getattr(capstone, prompt_cs_mode())
+            self.cs = Cs(self.cs_arch, self.cs_mode)
         return self.cs
 
     def get_arch(self):
         return self.arch
+
+    def get_mode(self):
+        return self.mode
+
+    def get_cs_arch(self):
+        return self.cs_arch
+
+    def get_cs_mode(self):
+        return self.cs_mode
 
     def get_current_address(self):
         return self.current_address
@@ -320,34 +338,24 @@ class UnicornDbg(object):
         self.functions_instance.batch_execution(commands)
 
 
-
 def prompt_arch():
     items = [k for k, v in unicorn_const.__dict__.items() if not k.startswith("__") and k.startswith("UC_ARCH")]
-    return prompt_list(items, 'arch', 'Select arch')
+    return utils.prompt_list(items, 'arch', 'Select arch')
 
 
 def prompt_mode():
     items = [k for k, v in unicorn_const.__dict__.items() if not k.startswith("__") and k.startswith("UC_MODE")]
-    return prompt_list(items, 'mode', 'Select mode')
+    return utils.prompt_list(items, 'mode', 'Select mode')
 
 
 def prompt_cs_arch():
     items = [k for k, v in capstone.__dict__.items() if not k.startswith("__") and k.startswith("CS_ARCH")]
-    return prompt_list(items, 'arch', 'Select arch')
+    return utils.prompt_list(items, 'arch', 'Select arch')
 
 
 def prompt_cs_mode():
     items = [k for k, v in capstone.__dict__.items() if not k.startswith("__") and k.startswith("CS_MODE")]
-    return prompt_list(items, 'mode', 'Select mode')
-
-
-def prompt_list(items, key, hint):
-    base_path = [
-        inquirer.List(key,
-                      message=hint,
-                      choices=items)]
-    r = inquirer.prompt(base_path)
-    return r[key]
+    return utils.prompt_list(items, 'mode', 'Select mode')
 
 
 if __name__ == "__main__":

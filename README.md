@@ -1,4 +1,4 @@
-# uDBG (WIP)
+# uDdbg (WIP)
 
 The goal is to build a sort of debugger by providing a dynamic environment based on unicorn emulator with features and commands close to GDB.
 The actual code, which is a very WIP, already allow to dynamically map and unmap
@@ -10,6 +10,16 @@ All the modules are accessible and have a command set which allow to interact wi
 All the things which came useful for the new CoC encryption reverse engineering will be some of the core feature of the tool in order to allow an easily understanding of complex and obfuscated functions.
 
 # Commands doc
+
+> **assemble**
+>
+> *asm*
+>
+> assemble instructions.
+>
+>     asm *instructions ('mov r1, r3;add r0, r3, r2') [! (trigger arch/mode)]
+
+***
 
 > **breakpoint**
 >
@@ -38,6 +48,16 @@ All the things which came useful for the new CoC encryption reverse engineering 
 > remove breakpoint at address.
 >
 >     d *address
+
+***
+
+> **disassemble**
+>
+> *dis, disasm*
+>
+> disassemble instructions.
+>
+>     disasm *hex_payload [arch (arm)] [mode (thumb)]
 
 ***
 
