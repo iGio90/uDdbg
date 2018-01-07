@@ -1,3 +1,4 @@
+import inquirer
 from termcolor import colored
 from unicorn import *
 
@@ -56,3 +57,12 @@ def get_reg_tag(arch):
         return "UC_SPARC_REG_"
     elif arch == UC_ARCH_X86:
         return "UC_X86_REG_"
+
+
+def prompt_list(items, key, hint):
+    base_path = [
+        inquirer.List(key,
+                      message=hint,
+                      choices=items)]
+    r = inquirer.prompt(base_path)
+    return r[key]
