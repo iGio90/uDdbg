@@ -34,7 +34,7 @@ class Mappings(AbstractUnicornDbgModule):
                         }
                     },
                     'map': {
-                        'usage': 'map [address] [length]',
+                        'usage': 'map [address] [length] [optional: map name]',
                         'help': 'Map *length at *address',
                         'function': {
                             "context": "mappings_module",
@@ -62,6 +62,9 @@ class Mappings(AbstractUnicornDbgModule):
     def map(self, func_name, *args):
         off = utils.input_to_offset(args[0])
         lent = utils.input_to_offset(args[1])
+        p = None
+        if len(args) > 2:
+            p = str(args[2])
 
         if off < 1024:
             off += 1024 - (off % 1024)
@@ -70,7 +73,7 @@ class Mappings(AbstractUnicornDbgModule):
             lent += 1024 - (lent % 1024)
 
         self.core_instance.get_emu_instance().mem_map(off, lent)
-        self.internal_add(off, lent)
+        self.internal_add(off, lent, p)
         print('Mapped ' + str(lent) + ' at ' + hex(off))
 
     def unmap(self, func_name, *args):
