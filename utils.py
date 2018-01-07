@@ -1,6 +1,9 @@
 import inquirer
 from termcolor import colored
 from unicorn import *
+import capstone
+from capstone import *
+from unicorn import unicorn_const
 
 
 def error_format(command, text):
@@ -69,3 +72,22 @@ def prompt_list(items, key, hint):
                       choices=items)]
     r = inquirer.prompt(base_path)
     return r[key]
+
+def prompt_arch():
+    items = [k for k, v in unicorn_const.__dict__.items() if not k.startswith("__") and k.startswith("UC_ARCH")]
+    return prompt_list(items, 'arch', 'Select arch')
+
+
+def prompt_mode():
+    items = [k for k, v in unicorn_const.__dict__.items() if not k.startswith("__") and k.startswith("UC_MODE")]
+    return prompt_list(items, 'mode', 'Select mode')
+
+
+def prompt_cs_arch():
+    items = [k for k, v in capstone.__dict__.items() if not k.startswith("__") and k.startswith("CS_ARCH")]
+    return prompt_list(items, 'arch', 'Select arch')
+
+
+def prompt_cs_mode():
+    items = [k for k, v in capstone.__dict__.items() if not k.startswith("__") and k.startswith("CS_MODE")]
+    return prompt_list(items, 'mode', 'Select mode')

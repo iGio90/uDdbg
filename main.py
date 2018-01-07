@@ -37,12 +37,12 @@ class UnicornDbgFunctions(object):
 
         # load modules
         try:
-            self.load_modules()
+            self.load_core_modules()
         except Exception as e:
             print(e)
             self.quit()
 
-    def load_modules(self):
+    def load_core_modules(self):
         core_module_instance = CoreModule(self)
         self.add_module(core_module_instance)
 
@@ -284,7 +284,20 @@ class UnicornDbg(object):
         """
         self.functions_instance.add_module(module)
 
-    def start(self, arch, mode):
+    def start(self, arch=None, mode=None):
+        """
+        main start function, here we handle the command get loop and unicorn istance creation
+        :param arch: unicorn arch int costant
+        :param mode: unicorn mode int costant
+        :return:
+        """
+
+        # if no arch or mode are sets in param, prompt for them
+        if not arch:
+            arch = utils.prompt_arch()
+        if not mode:
+            mode = utils.prompt_mode()
+
         self.arch = getattr(unicorn_const, arch)
         self.mode = getattr(unicorn_const, mode)
         self.emu_instance = Uc(self.arch, self.mode)
@@ -339,33 +352,10 @@ class UnicornDbg(object):
         self.functions_instance.batch_execution(commands)
 
 
-def prompt_arch():
-    items = [k for k, v in unicorn_const.__dict__.items() if not k.startswith("__") and k.startswith("UC_ARCH")]
-    return utils.prompt_list(items, 'arch', 'Select arch')
-
-
-def prompt_mode():
-    items = [k for k, v in unicorn_const.__dict__.items() if not k.startswith("__") and k.startswith("UC_MODE")]
-    return utils.prompt_list(items, 'mode', 'Select mode')
-
-
-def prompt_cs_arch():
-    items = [k for k, v in capstone.__dict__.items() if not k.startswith("__") and k.startswith("CS_ARCH")]
-    return utils.prompt_list(items, 'arch', 'Select arch')
-
-
-def prompt_cs_mode():
-    items = [k for k, v in capstone.__dict__.items() if not k.startswith("__") and k.startswith("CS_MODE")]
-    return utils.prompt_list(items, 'mode', 'Select mode')
-
 
 if __name__ == "__main__":
     udbg = UnicornDbg()
     t = module_test.MyModule(udbg)
-
     udbg.add_module(t)
 
-    arch = prompt_arch()
-    mode = prompt_mode()
-
-    udbg.start(arch, mode)
+    udbg.start()
