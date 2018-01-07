@@ -187,7 +187,6 @@ class CoreModule(AbstractUnicornDbgModule):
                     self.print_usage(h)
                     # if there are sub_commands print a list of them
                     if "sub_commands" in h:
-                        print("\nSub commands list:")
                         self.print_command_list(h["sub_commands"])
 
             except Exception as e:
@@ -197,7 +196,6 @@ class CoreModule(AbstractUnicornDbgModule):
 
         # if we have no args (so no commands) just print the commands list
         else:
-            print("\nCommands list:")
             self.print_command_list(self.core_instance.commands_map)
 
     def quit(self, *args):
@@ -256,8 +254,7 @@ class CoreModule(AbstractUnicornDbgModule):
             com_array.sort()
             command_table_arr = []
             for com in com_array:
-                com_t = []
-                com_t.append(com)
+                com_t = [utils.green_bold(com)]
                 have_shorts = "short" in com_obj[com]
                 if have_shorts:
                     com_t.append(com_obj[com]["short"])
@@ -267,7 +264,12 @@ class CoreModule(AbstractUnicornDbgModule):
                 com_t.append(self.print_usage(com_obj[com], only_get=True))
                 command_table_arr.append(com_t)
 
-            print(tabulate(command_table_arr, ['command', 'short', 'usage'], tablefmt="rst"))
+            print('')
+            print(tabulate(command_table_arr, [utils.white_bold_underline('command'),
+                                               utils.white_bold_underline('short'),
+                                               utils.white_bold_underline('usage')],
+                           tablefmt="simple"))
+            print('')
 
         except Exception as e:
             print("command_list err:" + e)
