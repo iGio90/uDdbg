@@ -86,6 +86,9 @@ class UnicornDbgFunctions(object):
                 # save the sub_command parent
                 prev_command = com
                 while last_function is False:
+                    # if the sub command is a ref, catch the right command
+                    if 'ref' in com:
+                        com = prev_command['sub_commands'][com['ref']]
                     if 'sub_commands' in com and possible_subcommand:
                         if possible_subcommand in com['sub_commands']:
                             prev_command = com
@@ -98,7 +101,6 @@ class UnicornDbgFunctions(object):
                                 possible_subcommand = args[0]
                             else:
                                 last_function = True
-
                         else:
                             last_function = True
                     else:
