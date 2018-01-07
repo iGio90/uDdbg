@@ -13,10 +13,19 @@ class Registers(AbstractUnicornDbgModule):
             'r': {
                 'ref': "registers",
             },
+            'reg': {
+                'ref': "registers",
+            },
+            'regs': {
+                'ref': "registers",
+            },
+            'register': {
+                'ref': "registers",
+            },
             'registers': {
-                'short': 'r',
+                'short': 'r,reg,regs',
                 'usage': 'registers [read|write] [...]',
-                'help': 'Registers operations',
+                'help': 'Print registers summary if no args given',
                 'function': {
                     "context": "registers_module",
                     "f": "registers"
@@ -38,6 +47,7 @@ class Registers(AbstractUnicornDbgModule):
                         }
                     },
                     'read': {
+                        'short': 'r',
                         'usage': 'registers read [register]',
                         'help': 'Read specific register',
                         'function': {
@@ -89,30 +99,55 @@ class Registers(AbstractUnicornDbgModule):
             .reg_read(arm_const.UC_ARM_REG_PC)
         lr = self.core_instance.get_emu_instance() \
             .reg_read(arm_const.UC_ARM_REG_LR)
-        r = [[utils.red_bold("R0"), hex(r0), r0],
-             [utils.red_bold("R1"), hex(r1), r1],
-             [utils.red_bold("R2"), hex(r1), r2],
-             [utils.red_bold("R3"), hex(r1), r3],
-             [utils.red_bold("R4"), hex(r1), r4],
-             [utils.red_bold("R5"), hex(r1), r5],
-             [utils.red_bold("R6"), hex(r1), r6],
-             [utils.red_bold("R7"), hex(r1), r7],
-             [utils.red_bold("R8"), hex(r1), r8],
-             [utils.red_bold("R9"), hex(r1), r9],
-             [utils.red_bold("R10"), hex(r1), r10],
-             [utils.red_bold("R11"), hex(r1), r11],
-             [utils.red_bold("R12"), hex(r1), r12],
-             [utils.red_bold("SP"), hex(r1), sp],
-             [utils.red_bold("PC"), hex(r1), pc],
-             [utils.red_bold("LR"), hex(r1), lr]]
-        h = [utils.green_bold('REGISTER'),
-             utils.green_bold('HEX'),
-             utils.green_bold('DECIMAL')]
-        print(tabulate(r, h, tablefmt="rst"))
+        r = [[utils.green_bold("R0"), hex(r0), r0],
+             [utils.green_bold("R1"), hex(r1), r1],
+             [utils.green_bold("R2"), hex(r1), r2],
+             [utils.green_bold("R3"), hex(r1), r3],
+             [utils.green_bold("R4"), hex(r1), r4],
+             [utils.green_bold("R5"), hex(r1), r5],
+             [utils.green_bold("R6"), hex(r1), r6],
+             [utils.green_bold("R7"), hex(r1), r7],
+             [utils.green_bold("R8"), hex(r1), r8],
+             [utils.green_bold("R9"), hex(r1), r9],
+             [utils.green_bold("R10"), hex(r1), r10],
+             [utils.green_bold("R11"), hex(r1), r11],
+             [utils.green_bold("R12"), hex(r1), r12],
+             [utils.green_bold("SP"), hex(r1), sp],
+             [utils.green_bold("PC"), hex(r1), pc],
+             [utils.green_bold("LR"), hex(r1), lr]]
+        h = [utils.white_bold_underline('register'),
+             utils.white_bold_underline('hex'),
+             utils.white_bold_underline('decimal')]
+        print('')
+        print(tabulate(r, h, tablefmt="simple"))
+        print('')
 
     def write(self, func_name, *args):
-        # todo
-        pass
+        arch = self.core_instance.unicorndbg_instance.get_arch()
+        try:
+            register = getattr(utils.get_arch_consts(arch), utils.get_reg_tag(arch) + str(args[0]).upper())
+        except Exception as e:
+            raise Exception('Register not found')
+
+        value = utils.input_to_offset(args[1])
+        self.core_instance.get_emu_instance().reg_write(register, value)
+        print(hex(value) + ' written into ' + str(args[0]).upper())
+
+    def read(self, func_name, *args):
+        arch = self.core_instance.unicorndbg_instance.get_arch()
+        try:
+            register = getattr(utils.get_arch_consts(arch), utils.get_reg_tag(arch) + str(args[0]).upper())
+        except Exception as e:
+            raise Exception('Register not found')
+
+        value = self.core_instance.get_emu_instance().reg_read(register)
+        r = [str(args[0]).upper(), hex(value), value]
+        h = [utils.white_bold_underline('register'),
+             utils.white_bold_underline('hex'),
+             utils.white_bold_underline('decimal')]
+        print('')
+        print(tabulate(r, h, tablefmt="simple"))
+        print('')
 
     def init(self):
         pass
