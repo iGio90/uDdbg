@@ -206,11 +206,18 @@ class UnicornDbg(object):
             for module in module_arr:
                 self.add_module(module)
 
+    def dbg_hooks(self, uc, address, size, user_data):
+        """
+        Unicorn instructions hook
+        """
+        if address in self.functions_instance.get_module('core_module').get_breakpoints_list():
+            print('Hit breakpoint at: ' + hex(address))
+            uc.stop_emulation()
+
     def add_module(self, module):
         """
         add modules to UnicornDbg core
         just an interface to call add_module in UnicornDbgFunctions
-
         """
         self.functions_instance.add_module(module)
 
@@ -218,6 +225,9 @@ class UnicornDbg(object):
         self.arch = getattr(unicorn_const, arch)
         self.mode = getattr(unicorn_const, mode)
         self.emu_instance = Uc(self.arch, self.mode)
+
+        # add hooks
+        self.emu_instance.hook_add(UC_HOOK_CODE, self.dbg_hooks)
 
         main_apix = colored(MENU_APPENDIX + " ", 'red', attrs=['bold', 'dark'])
         while True:
@@ -230,6 +240,9 @@ class UnicornDbg(object):
         if address > 0x0:
             self.current_address = address
         self.emu_instance.emu_start(self.current_address)
+
+    def stop_emulation(self):
+        self.emu_instance.emu_stop()
 
     def get_emu_instance(self):
         """ expose emu instance """

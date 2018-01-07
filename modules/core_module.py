@@ -1,3 +1,4 @@
+import utils
 from modules.unicorndbgmodule import AbstractUnicornDbgModule
 from termcolor import colored
 import sys
@@ -17,6 +18,7 @@ class CoreModule(AbstractUnicornDbgModule):
         :param core_instance:
         """
         AbstractUnicornDbgModule.__init__(self, core_instance)
+        self.bp_list = []
         self.context_name = "core_module"
         self.command_map = {
             'q': {
@@ -39,6 +41,9 @@ class CoreModule(AbstractUnicornDbgModule):
             },
             'break': {
                 'ref': "breakpoint",
+            },
+            'd': {
+                'ref': "delete breakpoint",
             },
             'quit': {
                 'short': 'q',
@@ -65,27 +70,14 @@ class CoreModule(AbstractUnicornDbgModule):
                 'help': 'Break the emulation at specific address',
                 'usage': 'breakpoint [address]'
             },
-            'show': {
-                'short': 's',
-                'usage': 'show [mappings|patches]',
-                'help': 'Show list of mappings and patches',
+            'delete': {
+                'short': 'd',
                 'function': {
                     "context": "core_module",
-                    "f": "show"
+                    "f": "rm_breakpoint"
                 },
-                'sub_commands': {
-                    'mappings': {
-                        'help': 'Show list of mappings',
-                        'sub_commands': {
-                            'sub1': {
-                                'help': 'TEST SUB'
-                            }
-                        },
-                    },
-                    'patches': {
-                        'help': 'Show list of patches'
-                    },
-                }
+                'help': 'Remove breakpoint',
+                'usage': 'delete [address]'
             },
             'continue': {
                 'short': 'c',
@@ -106,11 +98,20 @@ class CoreModule(AbstractUnicornDbgModule):
         }
 
     def breakpoint(self, *args):
-        # todo
-        pass
+        off = utils.input_to_offset(args[0])
+        if off not in self.bp_list:
+            self.bp_list.append(off)
+            print('Breakpoint added at: ' + hex(off))
+        else:
+            print('Breakpoint already set at ' + hex(off))
 
-    def show(self, *args):
-        pass
+    def rm_breakpoint(self, *args):
+        off = utils.input_to_offset(args[0])
+        if off in self.bp_list:
+            self.bp_list.remove(off)
+            print('Breakpoint at ' + hex(off) + ' removed.')
+        else:
+            print('No breakpoint at ' + hex(off))
 
     def modules(self, func_name, *args):
         """
@@ -149,7 +150,7 @@ class CoreModule(AbstractUnicornDbgModule):
                 # iterate for every command and sub_command in args
                 for arg in args:
                     c += 1
-                    # keep a reference (usefull for errors) of command\sub_command name
+                    # keep a reference (useful for errors) of command\sub_command name
                     command = arg
 
                     # if we already fetched the first main command
@@ -181,7 +182,7 @@ class CoreModule(AbstractUnicornDbgModule):
                         h = prev_h['sub_commands'][h['ref']]
 
                     # print help and usage passing h, the command object reference
-                    print("\nHelp for: "+colored(command, 'white', attrs=['underline', 'bold']))
+                    print("\nHelp for: " + colored(command, 'white', attrs=['underline', 'bold']))
                     print(h["help"])
                     self.print_usage(h)
                     # if there are sub_commands print a list of them
@@ -251,7 +252,6 @@ class CoreModule(AbstractUnicornDbgModule):
                 if "ref" not in com_obj[com]:
                     com_array.append(com)
 
-
             # sort the list of commands and print it
             com_array.sort()
             command_table_arr = []
@@ -270,21 +270,26 @@ class CoreModule(AbstractUnicornDbgModule):
             print(tabulate(command_table_arr, ['command', 'short', 'usage'], tablefmt="rst"))
 
         except Exception as e:
-            print("command_list err:"+e)
+            print("command_list err:" + e)
 
-                #print("\t" + colored(com + " (" + com_obj[com]["short"] + ")", 'white', attrs=['underline', 'bold']))
-            #else:
-                #print("\t" + colored(com, 'white', attrs=['underline', 'bold']))
+            # print("\t" + colored(com + " (" + com_obj[com]["short"] + ")", 'white', attrs=['underline', 'bold']))
+            # else:
+            # print("\t" + colored(com, 'white', attrs=['underline', 'bold']))
 
-            #if "help" in com_obj[com]:
-                #print("\t" + com_obj[com]["help"])
-                #print("\n")
+            # if "help" in com_obj[com]:
+            # print("\t" + com_obj[com]["help"])
+            # print("\n")
 
     def continue_exec(self):
         current_address = self.core_instance.unicorndbg_instance.get_current_address()
         if current_address == 0x0:
             start = input("Start address: ")
             self.core_instance.unicorndbg_instance.resume_emulation(start)
+        else:
+            self.core_instance.unicorndbg_instance.resume_emulation()
+
+    def get_breakpoints_list(self):
+        return self.bp_list
 
     def init(self):
         pass
