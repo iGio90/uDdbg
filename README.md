@@ -193,4 +193,44 @@ is equal to:
 
 ```m w 0x10000 0x00BF```
 
-## Have fun!
+# Other examples
+
+```load binary 0xea783000```
+
+or
+
+```load binary 0xea780000+0x3000```
+
+break executions
+
+```b 0xeb104c4```
+
+continue
+
+```c```
+
+read registers
+
+```registers```
+
+write something into r2
+
+```r w r2 0x20```
+
+assemble an instruction set
+
+```asm 'mov r2, r1;add r1, r0, r3'```
+
+write something into memory
+
+```m w 0xeb104c4 00BF00BF000000FFFFFF```
+
+read instructions
+
+```memory read 0xeb104c4 256 i```
+
+or
+
+```m r 0xeb104c4 256 i```
+
+# Have fun!
