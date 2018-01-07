@@ -51,14 +51,14 @@ class CoreModule(AbstractUnicornDbgModule):
                     "context": "core_module",
                     "f": "quit"
                 },
-                'help': 'Quit command'
+                'help': 'quit command'
             },
             'help': {
                 'function': {
                     "context": "core_module",
                     "f": "help"
                 },
-                'help': 'Show command',
+                'help': 'show command',
                 'usage': 'help [command]'
             },
             'breakpoint': {
@@ -67,7 +67,7 @@ class CoreModule(AbstractUnicornDbgModule):
                     "context": "core_module",
                     "f": "breakpoint"
                 },
-                'help': 'Break the emulation at specific address',
+                'help': 'break the emulation at specific address',
                 'usage': 'breakpoint [address]'
             },
             'delete': {
@@ -76,13 +76,13 @@ class CoreModule(AbstractUnicornDbgModule):
                     "context": "core_module",
                     "f": "rm_breakpoint"
                 },
-                'help': 'Remove breakpoint',
+                'help': 'remove breakpoint',
                 'usage': 'delete [address]'
             },
             'continue': {
                 'short': 'c',
                 'usage': 'continue',
-                'help': 'Start|Continue emulation',
+                'help': 'start / continue emulation',
                 'function': {
                     "context": "core_module",
                     "f": "continue_exec"
@@ -93,7 +93,7 @@ class CoreModule(AbstractUnicornDbgModule):
                     "context": "core_module",
                     "f": "modules"
                 },
-                'help': 'Loaded modules list'
+                'help': 'loaded modules list'
             },
         }
 
@@ -101,17 +101,17 @@ class CoreModule(AbstractUnicornDbgModule):
         off = utils.input_to_offset(args[0])
         if off not in self.bp_list:
             self.bp_list.append(off)
-            print('Breakpoint added at: ' + hex(off))
+            print('breakpoint added at: ' + hex(off))
         else:
-            print('Breakpoint already set at ' + hex(off))
+            print('breakpoint already set at ' + hex(off))
 
     def rm_breakpoint(self, *args):
         off = utils.input_to_offset(args[0])
         if off in self.bp_list:
             self.bp_list.remove(off)
-            print('Breakpoint at ' + hex(off) + ' removed.')
+            print('breakpoint at ' + hex(off) + ' removed.')
         else:
-            print('No breakpoint at ' + hex(off))
+            print('no breakpoint at ' + hex(off))
 
     def modules(self, func_name, *args):
         """
@@ -122,7 +122,7 @@ class CoreModule(AbstractUnicornDbgModule):
         :return:
         """
 
-        print("Loaded modules: \n")
+        print("loaded modules: \n")
         for module in self.core_instance.context_map:
             if module is not "self":
                 print("\t" + MENU_APIX + " " + colored(module, 'white', attrs=['underline', 'bold']))
@@ -191,7 +191,7 @@ class CoreModule(AbstractUnicornDbgModule):
 
             except Exception as e:
                 print("search Err: " + str(e))
-                print("No help for command '" + command + "'" + ' found')
+                print("no help for command '" + command + "'" + ' found')
                 self.print_usage(func_name)
 
         # if we have no args (so no commands) just print the commands list
@@ -229,7 +229,7 @@ class CoreModule(AbstractUnicornDbgModule):
         try:
             if "usage" in com:
                 if only_get is False:
-                    print("Usage: " + com["usage"])
+                    print("usage: " + com["usage"])
                 return com["usage"]
             else:
                 return None

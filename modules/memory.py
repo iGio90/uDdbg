@@ -17,7 +17,7 @@ class Memory(AbstractUnicornDbgModule):
             'memory': {
                 'short': 'm',
                 'usage': 'memory [dump|read|write] [...]',
-                'help': 'Memory operations',
+                'help': 'memory operations',
                 'sub_commands': {
                     'd': {
                         'ref': "dump",
@@ -31,7 +31,7 @@ class Memory(AbstractUnicornDbgModule):
                     'dump': {
                         'short': 'd',
                         'usage': 'memory dump [offset] [length] [file path]',
-                        'help': 'Dump memory',
+                        'help': 'dump memory',
                         'function': {
                             "context": "memory_module",
                             "f": "dump"
@@ -40,7 +40,7 @@ class Memory(AbstractUnicornDbgModule):
                     'read': {
                         'short': 'r',
                         'usage': 'memory read [offset] [length] [optional format: h|i]',
-                        'help': 'Read memory',
+                        'help': 'read memory',
                         'function': {
                             "context": "memory_module",
                             "f": "read"
@@ -49,7 +49,7 @@ class Memory(AbstractUnicornDbgModule):
                     'write': {
                         'short': 'w',
                         'usage': 'memory write [offset] [hex payload]',
-                        'help': 'Memory write',
+                        'help': 'memory write',
                         'function': {
                             "context": "memory_module",
                             "f": "write"
@@ -82,15 +82,21 @@ class Memory(AbstractUnicornDbgModule):
             for i in cs.disasm(bytes(b), off):
                 print("0x%x:\t%s\t%s" % (i.address, i.mnemonic, i.op_str))
         else:
-            print('Format invalid. Please use a valid format:')
+            print('format invalid. Please use a valid format:')
             print("\t" + 'h: hex')
             print("\t" + 'i: asm')
 
     def write(self, func_name, *args):
         off = utils.input_to_offset(args[0])
         pp = bytes.fromhex(args[1])
-        self.core_instance.get_emu_instance().mem_write(off, pp)
-        print(str(len(pp)) + ' written to ' + hex(off) + '.')
+        self.internal_write(off, pp)
+        print(str(len(pp)) + ' written to ' + hex(off))
+
+    def internal_write(self, off, payload):
+        self.core_instance.get_emu_instance().mem_write(off, payload)
+
+    def internal_read(self, off, l):
+        return self.core_instance.get_emu_instance().mem_read(off, l)
 
     def init(self):
         pass

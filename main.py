@@ -129,7 +129,7 @@ class UnicornDbgFunctions(object):
                     self.exec_command('help', [main_command] + mirror_args)
 
             else:
-                print("Command '" + command + "' not found")
+                print("command '" + command + "' not found")
         except Exception as e:
             print(colored("exec Err: ", 'white', attrs=['underline', 'bold']) + e + "\n")
             self.exec_command('help', [main_command])
@@ -168,7 +168,7 @@ class UnicornDbgFunctions(object):
                 # check if command already exist in the command map, if yes trigger error for the module load
                 for com in command_map:
                     if com in self.commands_map:
-                        raise Exception('Command "' + com + '" already exist')
+                        raise Exception('command "' + com + '" already exist')
                     else:
                         self.commands_map[com] = command_map[com]
 
@@ -214,7 +214,7 @@ class UnicornDbg(object):
         Unicorn instructions hook
         """
         if address in self.functions_instance.get_module('core_module').get_breakpoints_list():
-            print('Hit breakpoint at: ' + hex(address))
+            print('hit breakpoint at: ' + hex(address))
             uc.stop_emulation()
 
     def add_module(self, module):

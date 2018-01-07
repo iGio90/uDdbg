@@ -11,7 +11,7 @@ class Patches(AbstractUnicornDbgModule):
         self.patches = []
         self.context_name = "patches_module"
         self.command_map = {
-            'map': {
+            'patch': {
                 'short': 'p',
                 'help': 'Patches',
                 'usage': 'patch [list|add|remove|toggle] [...]',
@@ -34,7 +34,7 @@ class Patches(AbstractUnicornDbgModule):
                     'list': {
                         'short': 'l',
                         'usage': 'list',
-                        'help': 'List mappings',
+                        'help': 'list mappings',
                         'function': {
                             "context": "patches_module",
                             "f": "list"
@@ -42,7 +42,7 @@ class Patches(AbstractUnicornDbgModule):
                     },
                     'add': {
                         'usage': 'add [address] [hex payload]',
-                        'help': 'Write *payload into *address',
+                        'help': 'write *payload into *address',
                         'function': {
                             "context": "patches_module",
                             "f": "add"
@@ -50,7 +50,7 @@ class Patches(AbstractUnicornDbgModule):
                     },
                     'remove': {
                         'usage': 'remove [address]',
-                        'help': 'Remove active patch at *address',
+                        'help': 'remove active patch at *address',
                         'function': {
                             "context": "patches_module",
                             "f": "remove"
@@ -58,7 +58,7 @@ class Patches(AbstractUnicornDbgModule):
                     },
                     'toggle': {
                         'usage': 'toggle [address]',
-                        'help': 'Toggle patch at *address',
+                        'help': 'toggle patch at *address',
                         'function': {
                             "context": "patches_module",
                             "f": "toggle"
@@ -75,10 +75,24 @@ class Patches(AbstractUnicornDbgModule):
         print(tabulate(self.patches, h, tablefmt="simple"))
 
     def add(self, func_name, *args):
-        pass
+        off = utils.input_to_offset(args[0])
+        pp = bytes.fromhex(args[1])
+        pp_len = len(pp)
+        memory_module = self.core_instance.get_module('memory_module')
+        orig_pp = memory_module.internal_read(off, pp_len)
+        memory_module.internal_write(off, pp)
+        self.patches.append([off, pp_len, orig_pp, pp, 1])
+        print('patch created and written to ' + hex(off))
 
-    def remove(self, address, length, path=None):
-        pass
+    def remove(self, func_name, *args):
+        off = utils.input_to_offset(args[0])
+        for i in range(0, len(self.patches)):
+            p = self.patches[i]
+            if p[0] == off:
+                self.patches.pop(i)
+                print('patch at ' + hex(off) + ' removed.')
+                return
+        print('no patch found at ' + hex(off))
 
     def toggle(self, address, length, path=None):
         pass
