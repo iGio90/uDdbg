@@ -2,6 +2,9 @@ from termcolor import colored
 from unicorn import *
 
 
+def error_format(command, text):
+    return colored("ERR", 'red', attrs=['bold', 'underline']) + "(" + colored(command, 'white', attrs=['bold', 'underline']) + "): " + text
+
 def input_to_offset(off):
     try:
         if off.startswith('0x'):
