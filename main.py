@@ -129,7 +129,7 @@ class UnicornDbgFunctions(object):
             else:
                 print("Command '"+command+"' not found")
         except Exception as e:
-            print(colored("exec Err: ", 'white', attrs=['underline', 'bold'])+e+"\n")
+            print(colored("exec Err:", 'white', attrs=['underline', 'bold'])+" "+str(e)+"\n")
             self.exec_command('help', [main_command])
 
 
@@ -183,6 +183,37 @@ class UnicornDbgFunctions(object):
             print("Error in adding '" + context_name + "' module. Err: "+str(e))
             return False
 
+    def batch_execution(self, commands_arr):
+        """
+        batch execute a list of commands
+        :param commands_arr: array with commands
+        :return:
+        """
+        try:
+            if len(commands_arr) > 0:
+                print(MENU_APIX + colored(" Batch execution of "+str(len(commands_arr))+" commands", 'white', attrs=['underline', 'bold']))
+                for com in commands_arr:
+                    self.parse_command(com)
+            else:
+                raise Exception
+        except Exception as e:
+            print(MENU_APIX+" "+colored("FAILED", 'red', attrs=['underline', 'bold']) +" "+ colored("batch execution of " + str(len(commands_arr)) + " commands", 'white',attrs=['underline', 'bold']))
+
+    def parse_command(self, text):
+        """
+        parse command section, here we will make first filters and checks
+        TODO: i think we can filter here args (like -w) from sub commands
+        """
+        try:
+            command_arr = text.split(' ')
+
+            command = command_arr[0]
+            args = command_arr[1:]
+            self.exec_command(command, args)
+
+        except AttributeError as e:
+            print('error in parsing command')
+
 
 class UnicornDbg(object):
     @staticmethod
@@ -232,11 +263,12 @@ class UnicornDbg(object):
         self.emu_instance.hook_add(UC_HOOK_CODE, self.dbg_hooks)
 
         main_apix = colored(MENU_APPENDIX + " ", 'red', attrs=['bold', 'dark'])
+        udbg.batch_execution([])
         while True:
             print(main_apix, end='', flush=False)
             text = prompt('', history=self.history, auto_suggest=AutoSuggestFromHistory())
             # send command to the parser
-            self.parse_command(text)
+            self.functions_instance.parse_command(text)
 
     def resume_emulation(self, address=0x0):
         if address > 0x0:
@@ -265,20 +297,8 @@ class UnicornDbg(object):
     def get_current_address(self):
         return self.current_address
 
-    def parse_command(self, text):
-        """
-        parse command section, here we will make first filters and checks
-        TODO: i think we can filter here args (like -w) from sub commands
-        """
-        try:
-            command_arr = text.split(' ')
-
-            command = command_arr[0]
-            args = command_arr[1:]
-            self.functions_instance.exec_command(command, args)
-
-        except AttributeError as e:
-            print('error in parsing command')
+    def batch_execution(self, commands):
+        self.functions_instance.batch_execution(commands)
 
 
 def prompt_arch():

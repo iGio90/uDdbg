@@ -43,7 +43,7 @@ class CoreModule(AbstractUnicornDbgModule):
                 'ref': "breakpoint",
             },
             'd': {
-                'ref': "delete breakpoint",
+                'ref': "delete",
             },
             'quit': {
                 'short': 'q',
