@@ -10,6 +10,8 @@ from prompt_toolkit.shortcuts import prompt
 from termcolor import colored
 from unicorn import *
 import traceback, sys
+import utils
+import copy
 
 MENU_APPENDIX = '$>'
 MENU_APIX = '[' + colored('*', 'cyan', attrs=['bold', 'dark']) + ']'
@@ -67,10 +69,12 @@ class UnicornDbgFunctions(object):
         :param args: arguments array
         :return:
         """
-        mirror_args = args
+
+        # save original args an
+        mirror_args = copy.deepcopy(args)
+        main_command = command
         try:
-            main_command = command
-            if main_command == '':
+            if command == '':
                 return
 
             if command in self.commands_map:
@@ -130,17 +134,14 @@ class UnicornDbgFunctions(object):
                 else:
                     # if we have no method implementation of the command
                     # print the help of the command
-                    # passing all the arguments list to help function
-                    print([main_command] + mirror_args)
+                    # passing all the arguments list to help function (including the command) in a unique array
                     self.exec_command('help', [main_command] + mirror_args)
 
             else:
                 print("command '" + command + "' not found")
         except Exception as e:
-            print(colored("exec Err:", 'white', attrs=['underline', 'bold']) + " " + str(e) + "\n")
-            self.exec_command('help', [main_command])
-
-        # print("Debug args: %s"%args)
+            print(utils.error_format('exec_command', str(e)))
+            self.exec_command('help', [main_command] + mirror_args)
 
     def get_emu_instance(self):
         """ expose emu instance """

@@ -194,9 +194,8 @@ class CoreModule(AbstractUnicornDbgModule):
                         self.print_command_list(h["sub_commands"])
 
             except Exception as e:
-                print("search Err: " + str(e))
+                print(utils.error_format(func_name, str(e)))
                 print("no help for command '" + command + "'" + ' found')
-                self.print_usage(func_name)
 
         # if we have no args (so no commands) just print the commands list
         else:
@@ -233,7 +232,7 @@ class CoreModule(AbstractUnicornDbgModule):
         try:
             if "usage" in com:
                 if only_get is False:
-                    print("usage: " + com["usage"])
+                    print(utils.green_bold("usage: ") + com["usage"])
                 return com["usage"]
             else:
                 return None
@@ -276,15 +275,7 @@ class CoreModule(AbstractUnicornDbgModule):
             print('')
 
         except Exception as e:
-            print("command_list err:" + e)
-
-            # print("\t" + colored(com + " (" + com_obj[com]["short"] + ")", 'white', attrs=['underline', 'bold']))
-            # else:
-            # print("\t" + colored(com, 'white', attrs=['underline', 'bold']))
-
-            # if "help" in com_obj[com]:
-            # print("\t" + com_obj[com]["help"])
-            # print("\n")
+            print(utils.error_format('print_command_list', str(e)))
 
     def continue_exec(self):
         current_address = self.core_instance.unicorndbg_instance.get_current_address()
