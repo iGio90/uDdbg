@@ -13,8 +13,14 @@ class Registers(AbstractUnicornDbgModule):
             'r': {
                 'ref': "registers",
             },
+            'reg': {
+                'ref': "registers",
+            },
+            'register': {
+                'ref': "registers",
+            },
             'registers': {
-                'short': 'r',
+                'short': 'r,reg',
                 'usage': 'registers [read|write] [...]',
                 'help': 'Print registers summary if no args given',
                 'function': {
@@ -117,10 +123,12 @@ class Registers(AbstractUnicornDbgModule):
         arch = self.core_instance.unicorndbg_instance.get_arch()
         try:
             register = getattr(utils.get_arch_consts(arch), utils.get_reg_tag(arch) + str(args[0]).upper())
-            value = utils.input_to_offset(args[1])
-            self.core_instance.get_emu_instance().reg_write(register, value)
         except Exception as e:
             raise Exception('Register not found')
+
+        value = utils.input_to_offset(args[1])
+        self.core_instance.get_emu_instance().reg_write(register, value)
+        print(hex(value) + ' written into ' + str(args[0]).upper())
 
     def init(self):
         pass
