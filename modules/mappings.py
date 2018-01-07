@@ -70,6 +70,7 @@ class Mappings(AbstractUnicornDbgModule):
             lent += 1024 - (lent % 1024)
 
         self.core_instance.get_emu_instance().mem_map(off, lent)
+        self.internal_add(off, lent)
         print('Mapped ' + str(lent) + ' at ' + hex(off))
 
     def unmap(self, func_name, *args):
@@ -83,6 +84,12 @@ class Mappings(AbstractUnicornDbgModule):
             lent += 1024 - (lent % 1024)
 
         self.core_instance.get_emu_instance().mem_unmap(off, lent)
+        for i in range(0, len(self.mappings)):
+            if self.mappings[i][1] == off:
+                map_lent = self.mappings[i][2]
+                if map_lent == lent:
+                    self.mappings.pop(i)
+
         print('Unmapped ' + str(lent) + ' at ' + hex(off))
 
     def internal_add(self, address, length, path=None):
