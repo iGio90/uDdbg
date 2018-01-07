@@ -12,7 +12,7 @@ class Mappings(AbstractUnicornDbgModule):
         self.context_name = "mappings_module"
         self.command_map = {
             'map': {
-                'help': 'Mappings',
+                'help': 'mappings',
                 'usage': 'map [list|add|remove] [...]',
                 'sub_commands': {
                     'l': {
@@ -27,7 +27,7 @@ class Mappings(AbstractUnicornDbgModule):
                     'list': {
                         'short': 'l',
                         'usage': 'list',
-                        'help': 'List mappings',
+                        'help': 'list mappings',
                         'function': {
                             "context": "mappings_module",
                             "f": "list"
@@ -35,7 +35,7 @@ class Mappings(AbstractUnicornDbgModule):
                     },
                     'map': {
                         'usage': 'map [address] [length] [optional: map name]',
-                        'help': 'Map *length at *address',
+                        'help': 'map *length at *address',
                         'function': {
                             "context": "mappings_module",
                             "f": "add"
@@ -43,7 +43,7 @@ class Mappings(AbstractUnicornDbgModule):
                     },
                     'unmap': {
                         'usage': 'unmap [address] [length]',
-                        'help': 'Unmap *length at *address',
+                        'help': 'unmap *length at *address',
                         'function': {
                             "context": "mappings_module",
                             "f": "remove"
@@ -74,7 +74,7 @@ class Mappings(AbstractUnicornDbgModule):
 
         self.core_instance.get_emu_instance().mem_map(off, lent)
         self.internal_add(off, lent, p)
-        print('Mapped ' + str(lent) + ' at ' + hex(off))
+        print('mapped ' + str(lent) + ' at ' + hex(off))
 
     def unmap(self, func_name, *args):
         off = utils.input_to_offset(args[0])
@@ -93,7 +93,7 @@ class Mappings(AbstractUnicornDbgModule):
                 if map_lent == lent:
                     self.mappings.pop(i)
 
-        print('Unmapped ' + str(lent) + ' at ' + hex(off))
+        print('unmapped ' + str(lent) + ' at ' + hex(off))
 
     def internal_add(self, address, length, path=None):
         self.mappings.append([path, hex(address), length])

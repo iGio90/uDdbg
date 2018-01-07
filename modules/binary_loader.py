@@ -14,12 +14,12 @@ class BinaryLoader(AbstractUnicornDbgModule):
                     "context": "binary_loader",
                     "f": "load"
                 },
-                'help': 'Load binary and map it to specific offset'
+                'help': 'load binary and map it to specific offset'
             }
         }
 
     def load(self, func_name, *args):
-        path = input("Binary path: ")
+        path = input("binary path: ")
         if os.path.isfile(path):
             p = open(path, 'rb').read()
             off = utils.input_to_offset(input('Offset: '))
