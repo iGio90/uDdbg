@@ -54,10 +54,10 @@ class Mappings(AbstractUnicornDbgModule):
         }
 
     def list(self, func_name, *args):
-        h = [utils.green_bold('PATH'),
-             utils.green_bold('ADDRESS'),
-             utils.green_bold('LENGTH')]
-        print(tabulate(self.mappings, h, tablefmt="rst"))
+        h = [utils.green_bold('path'),
+             utils.green_bold('address'),
+             utils.green_bold('length')]
+        print(tabulate(self.mappings, h, tablefmt="simple"))
 
     def map(self, func_name, *args):
         off = utils.input_to_offset(args[0])
