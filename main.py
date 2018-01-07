@@ -75,9 +75,9 @@ class UnicornDbgFunctions(object):
         :return:
         """
 
-        # save original args an
-        mirror_args = copy.deepcopy(args)
-        main_command = command
+        # save the found command and sub_command array
+        complete_command_array = []
+        complete_command_array.append(command)
         try:
             if command == '':
                 return
@@ -111,10 +111,11 @@ class UnicornDbgFunctions(object):
                             prev_command = com
                             com = com['sub_commands'][possible_sub_command]
                             # pop the found sub_command so we can iterate on the remanings arguments
-                            args.pop(0)
+                            complete_command_array.append(args.pop(0))
                             command = possible_sub_command
                             # if there are arguments left
                             if len(args) > 0:
+                                # take the first args (the next sub_command)
                                 possible_sub_command = args[0]
                             else:
                                 last_function = True
@@ -140,13 +141,13 @@ class UnicornDbgFunctions(object):
                     # if we have no method implementation of the command
                     # print the help of the command
                     # passing all the arguments list to help function (including the command) in a unique array
-                    self.exec_command('help', [main_command] + mirror_args)
+                    self.exec_command('help', complete_command_array)
 
             else:
                 print("command '" + command + "' not found")
         except Exception as e:
             print(utils.error_format('exec_command', str(e)))
-            self.exec_command('help', [main_command] + mirror_args)
+            self.exec_command('help', complete_command_array)
 
     def get_emu_instance(self):
         """ expose emu instance """
@@ -183,7 +184,7 @@ class UnicornDbgFunctions(object):
                     if com in self.commands_map:
                         raise Exception('command "' + com + '" already exist')
 
-                self.commands_map.update(command_map)
+                self.commands_map.update(copy.deepcopy(command_map))
                 self.context_map[context_name] = module
 
                 print(MENU_APIX + " Module " + colored(context_name, 'white', attrs=['underline', 'bold']) + " loaded")
