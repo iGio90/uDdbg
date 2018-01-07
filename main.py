@@ -50,9 +50,6 @@ class UnicornDbgFunctions(object):
         registers_module = registers.Registers(self)
         self.add_module(registers_module)
 
-        registers_module = registers.Registers(self)
-        self.add_module(registers_module)
-
         patches_module = patches.Patches(self)
         self.add_module(patches_module)
 
