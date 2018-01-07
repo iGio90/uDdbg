@@ -328,8 +328,8 @@ class UnicornDbg(object):
         """ expose capstone instance """
         if self.cs is None:
             print('\nSetup capstone engine.')
-            self.cs_arch = getattr(capstone, prompt_cs_arch())
-            self.cs_mode = getattr(capstone, prompt_cs_mode())
+            self.cs_arch = getattr(capstone, utils.prompt_cs_arch())
+            self.cs_mode = getattr(capstone, utils.prompt_cs_mode())
             self.cs = Cs(self.cs_arch, self.cs_mode)
         return self.cs
 
