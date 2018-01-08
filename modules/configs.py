@@ -30,7 +30,6 @@ class Configs(AbstractUnicornDbgModule):
             },
             'configs': {
                 'help': 'print available configurations',
-                'usage': 'configs',
                 'function': {
                     "context": "configs_module",
                     "f": "configs"

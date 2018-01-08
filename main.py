@@ -5,7 +5,7 @@ from capstone import *
 
 import utils
 from modules.core_module import CoreModule
-from modules import binary_loader, memory, module_test, registers, mappings, patches, asm, configs
+from modules import binary_loader, memory, module_test, registers, mappings, patches, asm, configs, executors
 from prompt_toolkit.auto_suggest import AutoSuggestFromHistory
 from prompt_toolkit.history import InMemoryHistory
 from prompt_toolkit.shortcuts import prompt
@@ -66,6 +66,9 @@ class UnicornDbgFunctions(object):
 
         configs_module = configs.Configs(self)
         self.add_module(configs_module)
+
+        executors_module = executors.Executors(self)
+        self.add_module(executors_module)
 
     def exec_command(self, command, args):
         """

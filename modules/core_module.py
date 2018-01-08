@@ -85,7 +85,6 @@ class CoreModule(AbstractUnicornDbgModule):
             },
             'continue': {
                 'short': 'c',
-                'usage': 'continue',
                 'help': 'start / continue emulation',
                 'function': {
                     "context": "core_module",

@@ -12,7 +12,7 @@ class Mappings(AbstractUnicornDbgModule):
         self.context_name = "mappings_module"
         self.command_map = {
             'map': {
-                'help': 'mappings',
+                'help': 'memory mappings',
                 'usage': 'map [list|add|remove] [...]',
                 'sub_commands': {
                     'l': {
