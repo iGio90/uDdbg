@@ -149,8 +149,15 @@ class UnicornDbgFunctions(object):
             else:
                 print("command '" + command + "' not found")
         except Exception as e:
-            print(utils.error_format('exec_command', str(e)))
-            self.exec_command('help', complete_command_array)
+            if isinstance(e, UcError):
+                print(str(e))
+            else:
+                print(utils.error_format('exec_command', str(e)))
+                self.exec_command('help', complete_command_array)
+
+    def get_dbg_instance(self):
+        """ expose dbg instance """
+        return self.unicorndbg_instance
 
     def get_emu_instance(self):
         """ expose emu instance """
@@ -258,6 +265,8 @@ class UnicornDbg(object):
         self.cs_mode = None
         self.emu_instance = None
         self.cs = None
+        self.entry_point = 0x0
+        self.exit_point = 0x0
         self.current_address = 0x0
 
         self.history = InMemoryHistory()
@@ -272,10 +281,11 @@ class UnicornDbg(object):
             for module in module_arr:
                 self.add_module(module)
 
-    def dbg_hooks(self, uc, address, size, user_data):
+    def dbg_hook_code(self, uc, address, size, user_data):
         """
         Unicorn instructions hook
         """
+        self.current_address = address
         if address in self.functions_instance.get_module('core_module').get_breakpoints_list():
             print('hit breakpoint at: ' + hex(address))
             uc.stop_emulation()
@@ -307,7 +317,7 @@ class UnicornDbg(object):
         self.emu_instance = Uc(self.arch, self.mode)
 
         # add hooks
-        self.emu_instance.hook_add(UC_HOOK_CODE, self.dbg_hooks)
+        self.emu_instance.hook_add(UC_HOOK_CODE, self.dbg_hook_code)
 
         main_apix = colored(MENU_APPENDIX + " ", 'red', attrs=['bold', 'dark'])
         while True:
@@ -319,7 +329,11 @@ class UnicornDbg(object):
     def resume_emulation(self, address=0x0):
         if address > 0x0:
             self.current_address = address
-        self.emu_instance.emu_start(self.current_address)
+
+        if self.exit_point > 0x0:
+            self.emu_instance.emu_start(self.current_address, self.exit_point)
+        else:
+            print('please use \'set exit_point *offset\' to define an exit point')
 
     def stop_emulation(self):
         self.emu_instance.emu_stop()
@@ -355,6 +369,12 @@ class UnicornDbg(object):
         if self.cs_arch is not None:
             self.cs = Cs(self.cs_arch, self.cs_mode)
 
+    def set_entry_point(self, entry_point):
+        self.entry_point = entry_point
+
+    def set_exit_point(self, exit_point):
+        self.exit_point = exit_point
+
     def get_arch(self):
         return self.arch
 
@@ -369,6 +389,12 @@ class UnicornDbg(object):
 
     def get_current_address(self):
         return self.current_address
+
+    def get_entry_point(self):
+        return self.entry_point
+
+    def get_exit_point(self):
+        return self.entry_point
 
     def get_module(self, module_key):
         return self.functions_instance.get_module(module_key)

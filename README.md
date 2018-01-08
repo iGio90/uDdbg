@@ -85,7 +85,7 @@ All the things which came useful for the new CoC encryption reverse engineering 
 >
 > load and map binary from file.
 >
->     load *path *offset
+>     load *file_path *offset
 
 ***
 

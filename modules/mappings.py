@@ -38,7 +38,7 @@ class Mappings(AbstractUnicornDbgModule):
                         'help': 'map *length at *address',
                         'function': {
                             "context": "mappings_module",
-                            "f": "add"
+                            "f": "map"
                         }
                     },
                     'unmap': {
@@ -62,8 +62,9 @@ class Mappings(AbstractUnicornDbgModule):
         print('')
 
     def map(self, func_name, *args):
-        off = utils.input_to_offset(args[0])
-        lent = utils.input_to_offset(args[1])
+        off = int(eval((args[0])))
+        lent = int(eval((args[1])))
+
         p = None
         if len(args) > 2:
             p = str(args[2])
@@ -79,8 +80,8 @@ class Mappings(AbstractUnicornDbgModule):
         print('mapped ' + str(lent) + ' at ' + hex(off))
 
     def unmap(self, func_name, *args):
-        off = utils.input_to_offset(args[0])
-        lent = utils.input_to_offset(args[1])
+        off = int(eval((args[0])))
+        lent = int(eval((args[1])))
 
         if off < 1024:
             off += 1024 - (off % 1024)
@@ -94,7 +95,6 @@ class Mappings(AbstractUnicornDbgModule):
                 map_lent = self.mappings[i][2]
                 if map_lent == lent:
                     self.mappings.pop(i)
-
         print('unmapped ' + str(lent) + ' at ' + hex(off))
 
     def internal_add(self, address, length, path=None):

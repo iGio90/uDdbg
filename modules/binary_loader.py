@@ -14,6 +14,7 @@ class BinaryLoader(AbstractUnicornDbgModule):
             },
             "load": {
                 'short': 'lb',
+                'usage': 'load *file_path *offset',
                 'function': {
                     "context": "binary_loader",
                     "f": "load"
@@ -26,7 +27,7 @@ class BinaryLoader(AbstractUnicornDbgModule):
         path = args[0]
         if os.path.isfile(path):
             p = open(path, 'rb').read()
-            off = utils.input_to_offset(args[1])
+            off = int(eval((args[1])))
             binary_len = len(p)
 
             if off < 1024:

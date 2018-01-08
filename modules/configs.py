@@ -14,6 +14,8 @@ class Configs(AbstractUnicornDbgModule):
         self.configs_map = {
             'cs_arch': '',
             'cs_mode': '',
+            'entry_point': 0x0,
+            'exit_point': 0x0,
             'ks_arch': '',
             'ks_mode': ''
         }
@@ -57,7 +59,7 @@ class Configs(AbstractUnicornDbgModule):
 
     def set(self, func_name, *args):
         key = args[0]
-        value = args[1]
+        value = eval((args[1]))
         if key not in self.configs_map:
             print('config not found')
         else:
@@ -75,6 +77,14 @@ class Configs(AbstractUnicornDbgModule):
                     raise Exception('mode not found')
                 self.configs_map[key] = 'CS_MODE_' + str(args[1]).upper()
                 self.core_instance.set_cs_mode(mode)
+            elif key == 'entry_point':
+                value = int(value)
+                self.core_instance.get_dbg_instance().set_entry_point(value)
+                self.configs_map[key] = value
+            elif key == 'exit_point':
+                value = int(value)
+                self.core_instance.get_dbg_instance().set_exit_point(value)
+                self.configs_map[key] = value
             elif key == 'ks_arch':
                 try:
                     arch = getattr(keystone, 'KS_ARCH_' + str(args[1]).upper())
@@ -94,8 +104,7 @@ class Configs(AbstractUnicornDbgModule):
                 self.configs_map[key] = value
 
     def push_config(self, key, value):
-        self.configs_map[key] = value
-        self.configs_map = sorted(self.configs_map)
+        self.configs_map[key] = str(value)
 
     def init(self):
         pass

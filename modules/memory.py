@@ -60,8 +60,8 @@ class Memory(AbstractUnicornDbgModule):
         }
 
     def dump(self, func_name, *args):
-        off = utils.input_to_offset(args[0])
-        lent = utils.input_to_offset(args[1])
+        off = int(eval((args[0])))
+        lent = int(eval((args[1])))
         file_name = args[3]
         b = self.core_instance.get_emu_instance().mem_read(off, lent)
         with open(file_name, 'wb') as f:
@@ -69,8 +69,8 @@ class Memory(AbstractUnicornDbgModule):
         print(str(lent) + ' written to ' + file_name + '.')
 
     def read(self, func_name, *args):
-        off = utils.input_to_offset(args[0])
-        lent = utils.input_to_offset(args[1])
+        off = int(eval((args[0])))
+        lent = int(eval((args[1])))
         format = 'h'
         if len(args) > 2:
             format = args[2]
@@ -87,7 +87,7 @@ class Memory(AbstractUnicornDbgModule):
             print("\t" + 'i: asm')
 
     def write(self, func_name, *args):
-        off = utils.input_to_offset(args[0])
+        off = int(eval((args[0])))
         pp = bytes.fromhex(args[1])
         self.internal_write(off, pp)
         print(str(len(pp)) + ' written to ' + hex(off))

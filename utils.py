@@ -12,10 +12,6 @@ def error_format(command, text):
            colored(command, 'white', attrs=['bold', 'underline']) + "): " + text
 
 
-def input_to_offset(off):
-    return int(eval(off))
-
-
 def white_bold(text):
     return colored(text, attrs=['bold', 'dark'])
 

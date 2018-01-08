@@ -102,7 +102,7 @@ class CoreModule(AbstractUnicornDbgModule):
         }
 
     def breakpoint(self, *args):
-        off = utils.input_to_offset(args[0])
+        off = int(eval((args[1])))
         if off not in self.bp_list:
             self.bp_list.append(off)
             print('breakpoint added at: ' + hex(off))
@@ -110,7 +110,7 @@ class CoreModule(AbstractUnicornDbgModule):
             print('breakpoint already set at ' + hex(off))
 
     def rm_breakpoint(self, *args):
-        off = utils.input_to_offset(args[0])
+        off = int(eval((args[1])))
         if off in self.bp_list:
             self.bp_list.remove(off)
             print('breakpoint at ' + hex(off) + ' removed.')
@@ -277,11 +277,14 @@ class CoreModule(AbstractUnicornDbgModule):
         except Exception as e:
             print(utils.error_format('print_command_list', str(e)))
 
-    def continue_exec(self):
+    def continue_exec(self, func_name, *args):
         current_address = self.core_instance.unicorndbg_instance.get_current_address()
         if current_address == 0x0:
-            start = input("Start address: ")
-            self.core_instance.unicorndbg_instance.resume_emulation(start)
+            entry_point = self.core_instance.unicorndbg_instance.get_entry_point()
+            if entry_point > 0x0:
+                self.core_instance.unicorndbg_instance.resume_emulation(entry_point)
+            else:
+                print('please use \'set entry_point *offset\' to define an entry point')
         else:
             self.core_instance.unicorndbg_instance.resume_emulation()
 
