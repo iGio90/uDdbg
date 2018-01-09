@@ -134,6 +134,11 @@ class UnicornDbgFunctions(object):
                 # if we have a function field just fetch the context and the function name,
                 # bind them and call the function passing the arguments
                 if 'function' in com:
+                    if 'args' in com['function']:
+                        args_check, args_error = utils.check_args(com['function']['args'], args)
+                        if args_check is False:
+                            raise Exception(args_error)
+
                     context = self.context_map[com["function"]["context"]]
                     funct = com["function"]["f"]
                     call_method = getattr(context, funct)
