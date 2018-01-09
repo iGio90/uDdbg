@@ -96,15 +96,24 @@ def check_args(pattern, args):
     """
     # get the pattern array
     p_arr = pattern.split(' ')
+    args_effective_len = 0
+
+    for i, p in enumerate(p_arr):
+        if indexof(p, '@') == -1:
+            args_effective_len += 1
 
     # if args len doesn't match with the pattern
-    if len(p_arr) != len(args):
+    if len(args) < args_effective_len or len(args) > len(p_arr):
         return False, "args len doesn't match"
 
     # int str hex
     for i, arg in enumerate(args):
         if arg == '':
             return False, "arg " + str(i) + " is empty"
+
+        # if we have optional args
+        if indexof(p_arr[i], '@') != -1:
+            p_arr[i] = p_arr[i][1:]
 
         # select the right regex for the pattern
         if p_arr[i] == "int":
@@ -113,6 +122,10 @@ def check_args(pattern, args):
             reg = r".+"
         elif p_arr[i] == "hex":
             reg = r"0x\d+"
+        elif p_arr[i] == "hexsum":
+            reg = r"0x\d+\+0x\d+"
+        elif p_arr[i] == "intsum":
+            reg = r"\d+\+\d+"
         else:
             return False, "pattern " + str(i) + " wrong type"
 
@@ -120,3 +133,11 @@ def check_args(pattern, args):
             return False, "arg " + str(i) + " should be " + p_arr[i] + " type"
 
     return True, None
+
+
+def indexof(str, str_search):
+    try:
+        if str.index(str_search):
+            return str.index(str_search)
+    except Exception:
+        return -1
