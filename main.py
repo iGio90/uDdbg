@@ -1,9 +1,7 @@
 import capstone
-import inquirer
 
 from capstone import *
 
-import utils
 from modules.core_module import CoreModule
 from modules import binary_loader, memory, module_test, registers, mappings, patches, asm, configs, executors
 from prompt_toolkit.auto_suggest import AutoSuggestFromHistory
@@ -11,7 +9,7 @@ from prompt_toolkit.history import InMemoryHistory
 from prompt_toolkit.shortcuts import prompt
 from termcolor import colored
 from unicorn import *
-import traceback, sys
+import sys
 import utils
 import copy
 
@@ -321,6 +319,9 @@ class UnicornDbg(object):
 
         # add hooks
         self.emu_instance.hook_add(UC_HOOK_CODE, self.dbg_hook_code)
+
+        utils.clear_terminal()
+        print(utils.get_banner())
 
         main_apix = colored(MENU_APPENDIX + " ", 'red', attrs=['bold', 'dark'])
         while True:
