@@ -18,7 +18,10 @@ class CoreModule(AbstractUnicornDbgModule):
         :param core_instance:
         """
         AbstractUnicornDbgModule.__init__(self, core_instance)
+
+        # bp map
         self.bp_list = []
+
         self.context_name = "core_module"
         self.command_map = {
             'q': {

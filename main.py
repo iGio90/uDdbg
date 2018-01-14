@@ -206,7 +206,7 @@ class UnicornDbgFunctions(object):
         except Exception as e:
             raise Exception("Error in adding '" + context_name + "' module.\nErr: " + str(e))
 
-    def batch_execution(self, commands_arr):
+    def batch_execute(self, commands_arr):
         """
         batch execute a list of commands
         :param commands_arr: array with commands
@@ -403,8 +403,8 @@ class UnicornDbg(object):
     def get_module(self, module_key):
         return self.functions_instance.get_module(module_key)
 
-    def batch_execution(self, commands):
-        self.functions_instance.batch_execution(commands)
+    def batch_execute(self, commands):
+        self.functions_instance.batch_execute(commands)
 
 
 if __name__ == "__main__":

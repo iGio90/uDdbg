@@ -1,16 +1,9 @@
-import platform
-import subprocess
-from locale import atoi
-
-import binascii
 import inquirer
-import sys
 
 import os
 from termcolor import colored
 from unicorn import *
 import capstone
-from capstone import *
 from unicorn import unicorn_const
 import re
 
