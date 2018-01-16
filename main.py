@@ -1,5 +1,7 @@
 import capstone
+import os
 
+import time
 from capstone import *
 
 from modules.core_module import CoreModule
@@ -80,8 +82,7 @@ class UnicornDbgFunctions(object):
         """
 
         # save the found command and sub_command array
-        complete_command_array = []
-        complete_command_array.append(command)
+        complete_command_array = [command]
         try:
             if command == '':
                 return
@@ -269,6 +270,7 @@ class UnicornDbg(object):
         self.entry_point = 0x0
         self.exit_point = 0x0
         self.current_address = 0x0
+        self.last_mem_invalid_size = 0x0
 
         self.history = InMemoryHistory()
 
@@ -290,6 +292,20 @@ class UnicornDbg(object):
         if address in self.functions_instance.get_module('core_module').get_breakpoints_list():
             print('hit breakpoint at: ' + hex(address))
             uc.stop_emulation()
+
+    def dbg_hook_mem_invalid(self, uc, access, address, size, value, userdata):
+        """
+        Unicorn mem invalid hook
+        """
+
+        if size < 2:
+            size = self.last_mem_invalid_size
+        self.last_mem_invalid_size = size
+
+        pc = uc.reg_read(arm_const.UC_ARM_REG_PC)
+        self.get_module('registers_module').registers('mem_invalid')
+        self.get_module('asm_module').internal_disassemble(
+            uc.mem_read(pc, size), pc)
 
     def add_module(self, module):
         """
@@ -319,13 +335,16 @@ class UnicornDbg(object):
 
         # add hooks
         self.emu_instance.hook_add(UC_HOOK_CODE, self.dbg_hook_code)
+        self.emu_instance.hook_add(UC_HOOK_MEM_INVALID, self.dbg_hook_mem_invalid)
 
         utils.clear_terminal()
         print(utils.get_banner())
+        print('\n\n\t' + utils.white_bold('Contribute ') + 'https://github.com/iGio90/uDdbg\n')
+        print('\t' + 'Type ' + utils.white_bold_underline('help') + ' to begin.\n')
 
         main_apix = colored(MENU_APPENDIX + " ", 'red', attrs=['bold', 'dark'])
         while True:
-            print(main_apix, end='', flush=False)
+            print(main_apix, end='', flush=True)
             text = prompt('', history=self.history, auto_suggest=AutoSuggestFromHistory())
             # send command to the parser
             self.functions_instance.parse_command(text)

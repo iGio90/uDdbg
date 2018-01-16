@@ -91,9 +91,7 @@ class ASM(AbstractUnicornDbgModule):
         p = bytes.fromhex(args[0])
         off = 0x00
         if len(args) == 1:
-            cs = self.core_instance.get_cs_instance()
-            for i in cs.disasm(p, off):
-                print("0x%x:\t%s\t%s" % (i.address, i.mnemonic, i.op_str))
+            self.internal_disassemble(p, off)
         else:
             try:
                 arch = getattr(capstone.__all__, 'CS_ARCH_' + str(args[0]).upper())
@@ -108,6 +106,11 @@ class ASM(AbstractUnicornDbgModule):
             cs = capstone.Cs(arch, mode)
             for i in cs.disasm(p, off):
                 print("0x%x:\t%s\t%s" % (i.address, i.mnemonic, i.op_str))
+
+    def internal_disassemble(self, buf, off):
+        cs = self.core_instance.get_cs_instance()
+        for i in cs.disasm(bytes(buf), off):
+            print("0x%x:\t%s\t%s" % (i.address, i.mnemonic, i.op_str))
 
     def prompt_ks_arch(self):
         items = [k for k, v in keystone.__dict__.items() if not k.startswith("__") and k.startswith("KS_ARCH")]

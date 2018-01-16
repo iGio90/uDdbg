@@ -1,6 +1,7 @@
 from modules.unicorndbgmodule import AbstractUnicornDbgModule
 import utils
 
+
 class MyModule(AbstractUnicornDbgModule):
     def __init__(self, core_instance):
         AbstractUnicornDbgModule.__init__(self, core_instance)
@@ -12,16 +13,16 @@ class MyModule(AbstractUnicornDbgModule):
                     "f": "module_test"
                 },
                 'help': 'HELP My_module test function',
-                'sub_commands':{
-                    'sub1':{
-                        'help':'SUB1 HELP',
-                        'function':{
-                            'context':'my_module',
-                            'f':'sub1'
+                'sub_commands': {
+                    'sub1': {
+                        'help': 'SUB1 HELP',
+                        'function': {
+                            'context': 'my_module',
+                            'f': 'sub1'
                         }
                     },
-                    's1':{
-                        'ref':'sub1'
+                    's1': {
+                        'ref': 'sub1'
                     }
                 }
             }
@@ -29,8 +30,7 @@ class MyModule(AbstractUnicornDbgModule):
 
     def module_test(self, func_name, *args):
         print("This is a test from my_module test function")
-        print(utils.check_args("int int hex str",args))
-
+        print(utils.check_args("int int hex str", args))
 
     def sub1(self, func_name, *args):
         print("CALL TO SUB1")

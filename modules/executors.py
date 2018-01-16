@@ -32,7 +32,7 @@ class Executors(AbstractUnicornDbgModule):
             raise Exception('file not found or not accessible')
         f = open(f, 'r').read()
         cmd_arr = f.split("\n")
-        self.core_instance.get_emu_instance().batch_execute(cmd_arr)
+        self.core_instance.batch_execute(cmd_arr)
 
     def bexec(self, func_name, *args):
         pass
