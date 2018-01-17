@@ -1,17 +1,45 @@
+#############################################################################
+#
+#    Copyright (C) 2018
+#    Giovanni -iGio90- Rocca, Vincenzo -rEDSAMK- Greco
+#
+#    This program is free software: you can redistribute it and/or modify
+#    it under the terms of the GNU General Public License as published by
+#    the Free Software Foundation, either version 3 of the License, or
+#    (at your option) any later version.
+#
+#    This program is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#    GNU General Public License for more details.
+#
+#    You should have received a copy of the GNU General Public License
+#    along with this program.  If not, see <https://www.gnu.org/licenses/>
+#
+#############################################################################
+#
+# Unicorn DOPE Debugger
+#
+# Runtime bridge for unicorn emulator providing additional api to play with
+# Enjoy, have fun and contribute
+#
+# Github: https://github.com/iGio90/uDdbg
+# Twitter: https://twitter.com/iGio90
+#
+#############################################################################
+
 import capstone
-import inquirer
 
 from capstone import *
 
-import utils
 from modules.core_module import CoreModule
-from modules import binary_loader, memory, module_test, registers, mappings, patches, asm, configs
+from modules import binary_loader, memory, module_test, registers, mappings, patches, asm, configs, executors
 from prompt_toolkit.auto_suggest import AutoSuggestFromHistory
 from prompt_toolkit.history import InMemoryHistory
 from prompt_toolkit.shortcuts import prompt
 from termcolor import colored
 from unicorn import *
-import traceback, sys
+import sys
 import utils
 import copy
 
@@ -67,6 +95,9 @@ class UnicornDbgFunctions(object):
         configs_module = configs.Configs(self)
         self.add_module(configs_module)
 
+        executors_module = executors.Executors(self)
+        self.add_module(executors_module)
+
     def exec_command(self, command, args):
         """
         the core method of commands exec, it tries to fetch the requested command,
@@ -79,8 +110,7 @@ class UnicornDbgFunctions(object):
         """
 
         # save the found command and sub_command array
-        complete_command_array = []
-        complete_command_array.append(command)
+        complete_command_array = [command]
         try:
             if command == '':
                 return
@@ -210,7 +240,7 @@ class UnicornDbgFunctions(object):
         except Exception as e:
             raise Exception("Error in adding '" + context_name + "' module.\nErr: " + str(e))
 
-    def batch_execution(self, commands_arr):
+    def batch_execute(self, commands_arr):
         """
         batch execute a list of commands
         :param commands_arr: array with commands
@@ -273,6 +303,7 @@ class UnicornDbg(object):
         self.entry_point = 0x0
         self.exit_point = 0x0
         self.current_address = 0x0
+        self.last_mem_invalid_size = 0x0
 
         self.history = InMemoryHistory()
 
@@ -291,9 +322,25 @@ class UnicornDbg(object):
         Unicorn instructions hook
         """
         self.current_address = address
+        self.instructions_count += 1
+
         if address in self.functions_instance.get_module('core_module').get_breakpoints_list():
             print('hit breakpoint at: ' + hex(address))
             uc.stop_emulation()
+
+    def dbg_hook_mem_invalid(self, uc, access, address, size, value, userdata):
+        """
+        Unicorn mem invalid hook
+        """
+        if size < 2:
+            size = self.last_mem_invalid_size
+        self.last_mem_invalid_size = size
+
+        pc = uc.reg_read(arm_const.UC_ARM_REG_PC)
+        self.get_module('registers_module').registers('mem_invalid')
+        print(utils.titlify('disasm'))
+        self.get_module('asm_module').internal_disassemble(
+            uc.mem_read(pc, size), pc)
 
     def add_module(self, module):
         """
@@ -323,10 +370,17 @@ class UnicornDbg(object):
 
         # add hooks
         self.emu_instance.hook_add(UC_HOOK_CODE, self.dbg_hook_code)
+        self.emu_instance.hook_add(UC_HOOK_MEM_INVALID, self.dbg_hook_mem_invalid)
+
+        utils.clear_terminal()
+        print(utils.get_banner())
+        print('\n\n\t' + utils.white_bold('Contribute ') + 'https://github.com/iGio90/uDdbg\n')
+        print('\t' + 'Type ' + utils.white_bold_underline('help') + ' to begin.\n')
 
         main_apix = colored(MENU_APPENDIX + " ", 'red', attrs=['bold', 'dark'])
+        print()
         while True:
-            print(main_apix, end='', flush=False)
+            print(main_apix, end='', flush=True)
             text = prompt('', history=self.history, auto_suggest=AutoSuggestFromHistory())
             # send command to the parser
             self.functions_instance.parse_command(text)
@@ -336,6 +390,7 @@ class UnicornDbg(object):
             self.current_address = address
 
         if self.exit_point > 0x0:
+            print(utils.white_bold("emulation") + " started at " + utils.green_bold(hex(self.current_address)))
             self.emu_instance.emu_start(self.current_address, self.exit_point)
         else:
             print('please use \'set exit_point *offset\' to define an exit point')
@@ -404,8 +459,11 @@ class UnicornDbg(object):
     def get_module(self, module_key):
         return self.functions_instance.get_module(module_key)
 
-    def batch_execution(self, commands):
-        self.functions_instance.batch_execution(commands)
+    def batch_execute(self, commands):
+        self.functions_instance.batch_execute(commands)
+
+    def exec_command(self, command):
+        self.functions_instance.exec_command(command)
 
 
 if __name__ == "__main__":

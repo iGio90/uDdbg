@@ -1,3 +1,33 @@
+#############################################################################
+#
+#    Copyright (C) 2018
+#    Giovanni -iGio90- Rocca, Vincenzo -rEDSAMK- Greco
+#
+#    This program is free software: you can redistribute it and/or modify
+#    it under the terms of the GNU General Public License as published by
+#    the Free Software Foundation, either version 3 of the License, or
+#    (at your option) any later version.
+#
+#    This program is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#    GNU General Public License for more details.
+#
+#    You should have received a copy of the GNU General Public License
+#    along with this program.  If not, see <https://www.gnu.org/licenses/>
+#
+#############################################################################
+#
+# Unicorn DOPE Debugger
+#
+# Runtime bridge for unicorn emulator providing additional api to play with
+# Enjoy, have fun and contribute
+#
+# Github: https://github.com/iGio90/uDdbg
+# Twitter: https://twitter.com/iGio90
+#
+#############################################################################
+
 import capstone
 import keystone
 from tabulate import tabulate
@@ -30,7 +60,6 @@ class Configs(AbstractUnicornDbgModule):
             },
             'configs': {
                 'help': 'print available configurations',
-                'usage': 'configs',
                 'function': {
                     "context": "configs_module",
                     "f": "configs"
@@ -50,7 +79,10 @@ class Configs(AbstractUnicornDbgModule):
         r = []
 
         for key in self.configs_map:
-            r.append([utils.green_bold(key), self.configs_map[key]])
+            val = self.configs_map[key]
+            if isinstance(val, int):
+                val = hex(val)
+            r.append([utils.green_bold(key), val])
         h = [utils.white_bold_underline('config'),
              utils.white_bold_underline('value')]
         print('')

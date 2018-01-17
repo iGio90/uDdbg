@@ -1,3 +1,33 @@
+#############################################################################
+#
+#    Copyright (C) 2018
+#    Giovanni -iGio90- Rocca, Vincenzo -rEDSAMK- Greco
+#
+#    This program is free software: you can redistribute it and/or modify
+#    it under the terms of the GNU General Public License as published by
+#    the Free Software Foundation, either version 3 of the License, or
+#    (at your option) any later version.
+#
+#    This program is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#    GNU General Public License for more details.
+#
+#    You should have received a copy of the GNU General Public License
+#    along with this program.  If not, see <https://www.gnu.org/licenses/>
+#
+#############################################################################
+#
+# Unicorn DOPE Debugger
+#
+# Runtime bridge for unicorn emulator providing additional api to play with
+# Enjoy, have fun and contribute
+#
+# Github: https://github.com/iGio90/uDdbg
+# Twitter: https://twitter.com/iGio90
+#
+#############################################################################
+
 import capstone
 import keystone
 
@@ -91,9 +121,7 @@ class ASM(AbstractUnicornDbgModule):
         p = bytes.fromhex(args[0])
         off = 0x00
         if len(args) == 1:
-            cs = self.core_instance.get_cs_instance()
-            for i in cs.disasm(p, off):
-                print("0x%x:\t%s\t%s" % (i.address, i.mnemonic, i.op_str))
+            self.internal_disassemble(p, off)
         else:
             try:
                 arch = getattr(capstone.__all__, 'CS_ARCH_' + str(args[0]).upper())
@@ -107,7 +135,14 @@ class ASM(AbstractUnicornDbgModule):
                     raise Exception('mode not found')
             cs = capstone.Cs(arch, mode)
             for i in cs.disasm(p, off):
-                print("0x%x:\t%s\t%s" % (i.address, i.mnemonic, i.op_str))
+                a = hex(i.address)
+                print(utils.green_bold(a) + "\t%s\t%s" % (i.mnemonic, i.op_str))
+
+    def internal_disassemble(self, buf, off):
+        cs = self.core_instance.get_cs_instance()
+        for i in cs.disasm(bytes(buf), off):
+            a = hex(i.address)
+            print(utils.green_bold(a) + "\t%s\t%s" % (i.mnemonic, i.op_str))
 
     def prompt_ks_arch(self):
         items = [k for k, v in keystone.__dict__.items() if not k.startswith("__") and k.startswith("KS_ARCH")]

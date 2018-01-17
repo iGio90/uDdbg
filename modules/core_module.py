@@ -1,3 +1,33 @@
+#############################################################################
+#
+#    Copyright (C) 2018
+#    Giovanni -iGio90- Rocca, Vincenzo -rEDSAMK- Greco
+#
+#    This program is free software: you can redistribute it and/or modify
+#    it under the terms of the GNU General Public License as published by
+#    the Free Software Foundation, either version 3 of the License, or
+#    (at your option) any later version.
+#
+#    This program is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#    GNU General Public License for more details.
+#
+#    You should have received a copy of the GNU General Public License
+#    along with this program.  If not, see <https://www.gnu.org/licenses/>
+#
+#############################################################################
+#
+# Unicorn DOPE Debugger
+#
+# Runtime bridge for unicorn emulator providing additional api to play with
+# Enjoy, have fun and contribute
+#
+# Github: https://github.com/iGio90/uDdbg
+# Twitter: https://twitter.com/iGio90
+#
+#############################################################################
+
 import utils
 from modules.unicorndbgmodule import AbstractUnicornDbgModule
 from termcolor import colored
@@ -18,7 +48,10 @@ class CoreModule(AbstractUnicornDbgModule):
         :param core_instance:
         """
         AbstractUnicornDbgModule.__init__(self, core_instance)
+
+        # bp map
         self.bp_list = []
+
         self.context_name = "core_module"
         self.command_map = {
             'q': {
@@ -85,7 +118,6 @@ class CoreModule(AbstractUnicornDbgModule):
             },
             'continue': {
                 'short': 'c',
-                'usage': 'continue',
                 'help': 'start / continue emulation',
                 'function': {
                     "context": "core_module",
@@ -186,7 +218,7 @@ class CoreModule(AbstractUnicornDbgModule):
                         h = prev_h['sub_commands'][h['ref']]
 
                     # print help and usage passing h, the command object reference
-                    print("\nHelp for: " + colored(command, 'white', attrs=['underline', 'bold']))
+                    print(utils.titlify(command))
                     print(h["help"])
                     self.print_usage(h)
                     # if there are sub_commands print a list of them
@@ -267,12 +299,11 @@ class CoreModule(AbstractUnicornDbgModule):
                 com_t.append(self.print_usage(com_obj[com], only_get=True))
                 command_table_arr.append(com_t)
 
-            print('')
+            print(utils.titlify('help'))
             print(tabulate(command_table_arr, [utils.white_bold_underline('command'),
                                                utils.white_bold_underline('short'),
                                                utils.white_bold_underline('usage')],
                            tablefmt="simple"))
-            print('')
 
         except Exception as e:
             print(utils.error_format('print_command_list', str(e)))

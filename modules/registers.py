@@ -1,3 +1,33 @@
+#############################################################################
+#
+#    Copyright (C) 2018
+#    Giovanni -iGio90- Rocca, Vincenzo -rEDSAMK- Greco
+#
+#    This program is free software: you can redistribute it and/or modify
+#    it under the terms of the GNU General Public License as published by
+#    the Free Software Foundation, either version 3 of the License, or
+#    (at your option) any later version.
+#
+#    This program is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#    GNU General Public License for more details.
+#
+#    You should have received a copy of the GNU General Public License
+#    along with this program.  If not, see <https://www.gnu.org/licenses/>
+#
+#############################################################################
+#
+# Unicorn DOPE Debugger
+#
+# Runtime bridge for unicorn emulator providing additional api to play with
+# Enjoy, have fun and contribute
+#
+# Github: https://github.com/iGio90/uDdbg
+# Twitter: https://twitter.com/iGio90
+#
+#############################################################################
+
 from tabulate import tabulate
 from unicorn import *
 
@@ -60,6 +90,7 @@ class Registers(AbstractUnicornDbgModule):
         }
 
     def registers(self, func_name, *args):
+        print(utils.titlify('registers'))
         arch = self.core_instance.unicorndbg_instance.get_arch()
         if arch == UC_ARCH_ARM:
             self.print_arm_registers()
@@ -101,26 +132,24 @@ class Registers(AbstractUnicornDbgModule):
             .reg_read(arm_const.UC_ARM_REG_LR)
         r = [[utils.green_bold("r0"), hex(r0), r0],
              [utils.green_bold("r1"), hex(r1), r1],
-             [utils.green_bold("r2"), hex(r1), r2],
-             [utils.green_bold("r3"), hex(r1), r3],
-             [utils.green_bold("r4"), hex(r1), r4],
-             [utils.green_bold("r5"), hex(r1), r5],
-             [utils.green_bold("r6"), hex(r1), r6],
-             [utils.green_bold("r7"), hex(r1), r7],
-             [utils.green_bold("r8"), hex(r1), r8],
-             [utils.green_bold("r9"), hex(r1), r9],
-             [utils.green_bold("r10"), hex(r1), r10],
-             [utils.green_bold("r11"), hex(r1), r11],
-             [utils.green_bold("r12"), hex(r1), r12],
-             [utils.green_bold("sp"), hex(r1), sp],
-             [utils.green_bold("pc"), hex(r1), pc],
-             [utils.green_bold("lr"), hex(r1), lr]]
+             [utils.green_bold("r2"), hex(r2), r2],
+             [utils.green_bold("r3"), hex(r3), r3],
+             [utils.green_bold("r4"), hex(r4), r4],
+             [utils.green_bold("r5"), hex(r5), r5],
+             [utils.green_bold("r6"), hex(r6), r6],
+             [utils.green_bold("r7"), hex(r7), r7],
+             [utils.green_bold("r8"), hex(r8), r8],
+             [utils.green_bold("r9"), hex(r9), r9],
+             [utils.green_bold("r10"), hex(r10), r10],
+             [utils.green_bold("r11"), hex(r11), r11],
+             [utils.green_bold("r12"), hex(r12), r12],
+             [utils.green_bold("sp"), hex(sp), sp],
+             [utils.green_bold("pc"), hex(pc), pc],
+             [utils.green_bold("lr"), hex(lr), lr]]
         h = [utils.white_bold_underline('register'),
              utils.white_bold_underline('hex'),
              utils.white_bold_underline('decimal')]
-        print('')
         print(tabulate(r, h, tablefmt="simple"))
-        print('')
 
     def write(self, func_name, *args):
         arch = self.core_instance.unicorndbg_instance.get_arch()
