@@ -1,3 +1,5 @@
+import threading
+
 import capstone
 import os
 
@@ -289,6 +291,8 @@ class UnicornDbg(object):
         Unicorn instructions hook
         """
         self.current_address = address
+        self.instructions_count += 1
+
         if address in self.functions_instance.get_module('core_module').get_breakpoints_list():
             print('hit breakpoint at: ' + hex(address))
             uc.stop_emulation()
@@ -343,6 +347,7 @@ class UnicornDbg(object):
         print('\t' + 'Type ' + utils.white_bold_underline('help') + ' to begin.\n')
 
         main_apix = colored(MENU_APPENDIX + " ", 'red', attrs=['bold', 'dark'])
+        print()
         while True:
             print(main_apix, end='', flush=True)
             text = prompt('', history=self.history, auto_suggest=AutoSuggestFromHistory())
@@ -354,6 +359,7 @@ class UnicornDbg(object):
             self.current_address = address
 
         if self.exit_point > 0x0:
+            print(utils.white_bold("emulation") + " started at " + utils.green_bold(hex(self.current_address)))
             self.emu_instance.emu_start(self.current_address, self.exit_point)
         else:
             print('please use \'set exit_point *offset\' to define an exit point')
@@ -424,6 +430,9 @@ class UnicornDbg(object):
 
     def batch_execute(self, commands):
         self.functions_instance.batch_execute(commands)
+
+    def exec_command(self, command):
+        self.functions_instance.exec_command(command)
 
 
 if __name__ == "__main__":

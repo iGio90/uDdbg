@@ -49,7 +49,10 @@ class Configs(AbstractUnicornDbgModule):
         r = []
 
         for key in self.configs_map:
-            r.append([utils.green_bold(key), self.configs_map[key]])
+            val = self.configs_map[key]
+            if isinstance(val, int):
+                val = hex(val)
+            r.append([utils.green_bold(key), val])
         h = [utils.white_bold_underline('config'),
              utils.white_bold_underline('value')]
         print('')
