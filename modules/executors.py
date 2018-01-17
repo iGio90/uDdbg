@@ -80,6 +80,9 @@ class Executors(AbstractUnicornDbgModule):
                     'ld': {
                         'ref': "load",
                     },
+                    'r': {
+                        'ref': "run",
+                    },
                     'delete': {
                         'short': 'd,del',
                         'usage': 'exec delete *executors_id',
@@ -96,6 +99,15 @@ class Executors(AbstractUnicornDbgModule):
                         'function': {
                             "context": "executors_module",
                             "f": "load_exec"
+                        }
+                    },
+                    'run': {
+                        'short': 'r',
+                        'usage': 'exec run *executors_id',
+                        'help': 'run an executor',
+                        'function': {
+                            "context": "executors_module",
+                            "f": "run_exec"
                         }
                     }
                 }
@@ -145,6 +157,17 @@ class Executors(AbstractUnicornDbgModule):
                 print(utils.green_bold(str(id)) + ": removed")
         except Exception as e:
             print(utils.green_bold('usage: ') + 'exec delete *executor_id')
+
+    def run_exec(self, func_name, *args):
+        try:
+            id = int(args[0])
+            if id not in self.executors_id_map:
+                print('executor not found')
+            else:
+                cmd_arr = self.executors_map[self.executors_id_map[id]]['cmd_list']
+                self.core_instance.batch_execute(cmd_arr)
+        except Exception as e:
+            print(utils.green_bold('usage: ') + 'exec run *executor_id')
 
     def init(self):
         pass

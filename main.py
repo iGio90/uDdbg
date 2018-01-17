@@ -248,7 +248,7 @@ class UnicornDbgFunctions(object):
         """
         try:
             if len(commands_arr) > 0:
-                print(MENU_APIX + colored(" Batch execution of " + str(len(commands_arr)) + " commands", 'white',
+                print(MENU_APIX + ' ' + colored("Batch execution of " + str(len(commands_arr)) + " commands", 'white',
                                           attrs=['underline', 'bold']))
                 for com in commands_arr:
                     self.parse_command(com)

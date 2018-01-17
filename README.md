@@ -73,6 +73,16 @@ All the things which came useful for the new CoC encryption reverse engineering 
 
 ***
 
+> **executors**
+>
+> *e, ex, exec*
+>
+> manage executors.
+>
+>     exec [delete|load|new|run|save]
+
+***
+
 > **help**
 >
 > *h*
