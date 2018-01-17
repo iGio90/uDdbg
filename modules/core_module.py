@@ -188,7 +188,7 @@ class CoreModule(AbstractUnicornDbgModule):
                         h = prev_h['sub_commands'][h['ref']]
 
                     # print help and usage passing h, the command object reference
-                    print("\nHelp for: " + colored(command, 'white', attrs=['underline', 'bold']))
+                    print(utils.titlify(command))
                     print(h["help"])
                     self.print_usage(h)
                     # if there are sub_commands print a list of them
@@ -269,12 +269,11 @@ class CoreModule(AbstractUnicornDbgModule):
                 com_t.append(self.print_usage(com_obj[com], only_get=True))
                 command_table_arr.append(com_t)
 
-            print('')
+            print(utils.titlify('help'))
             print(tabulate(command_table_arr, [utils.white_bold_underline('command'),
                                                utils.white_bold_underline('short'),
                                                utils.white_bold_underline('usage')],
                            tablefmt="simple"))
-            print('')
 
         except Exception as e:
             print(utils.error_format('print_command_list', str(e)))

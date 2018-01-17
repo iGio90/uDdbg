@@ -297,13 +297,13 @@ class UnicornDbg(object):
         """
         Unicorn mem invalid hook
         """
-
         if size < 2:
             size = self.last_mem_invalid_size
         self.last_mem_invalid_size = size
 
         pc = uc.reg_read(arm_const.UC_ARM_REG_PC)
         self.get_module('registers_module').registers('mem_invalid')
+        print(utils.titlify('disasm'))
         self.get_module('asm_module').internal_disassemble(
             uc.mem_read(pc, size), pc)
 

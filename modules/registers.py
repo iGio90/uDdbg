@@ -60,6 +60,7 @@ class Registers(AbstractUnicornDbgModule):
         }
 
     def registers(self, func_name, *args):
+        print(utils.titlify('registers'))
         arch = self.core_instance.unicorndbg_instance.get_arch()
         if arch == UC_ARCH_ARM:
             self.print_arm_registers()
@@ -118,9 +119,7 @@ class Registers(AbstractUnicornDbgModule):
         h = [utils.white_bold_underline('register'),
              utils.white_bold_underline('hex'),
              utils.white_bold_underline('decimal')]
-        print('')
         print(tabulate(r, h, tablefmt="simple"))
-        print('')
 
     def write(self, func_name, *args):
         arch = self.core_instance.unicorndbg_instance.get_arch()

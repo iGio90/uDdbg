@@ -105,12 +105,14 @@ class ASM(AbstractUnicornDbgModule):
                     raise Exception('mode not found')
             cs = capstone.Cs(arch, mode)
             for i in cs.disasm(p, off):
-                print("0x%x:\t%s\t%s" % (i.address, i.mnemonic, i.op_str))
+                a = hex(i.address)
+                print(utils.green_bold(a) + "\t%s\t%s" % (i.mnemonic, i.op_str))
 
     def internal_disassemble(self, buf, off):
         cs = self.core_instance.get_cs_instance()
         for i in cs.disasm(bytes(buf), off):
-            print("0x%x:\t%s\t%s" % (i.address, i.mnemonic, i.op_str))
+            a = hex(i.address)
+            print(utils.green_bold(a) + "\t%s\t%s" % (i.mnemonic, i.op_str))
 
     def prompt_ks_arch(self):
         items = [k for k, v in keystone.__dict__.items() if not k.startswith("__") and k.startswith("KS_ARCH")]

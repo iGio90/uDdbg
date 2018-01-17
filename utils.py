@@ -1,13 +1,37 @@
 import random
+import struct
 
+import fcntl
 import inquirer
 
 import os
+
+import termios
 from termcolor import colored
 from unicorn import *
 import capstone
 from unicorn import unicorn_const
 import re
+
+
+def titlify(text):
+    """
+    Print a title.
+    Thanks -> https://github.com/hugsy/gef/blob/master/gef.py#L815
+    """
+    cols = get_terminal_size()[1]
+    nb = (cols - len(text) - 4)//2
+    msg = [white_bold("-" * nb + '[ '),
+           green_bold(text),
+           white_bold(' ]' + "-" * nb)]
+    return "".join(msg)
+
+
+def get_terminal_size():
+    """Return the current terminal size."""
+    cmd = struct.unpack("hh", fcntl.ioctl(1, termios.TIOCGWINSZ, "1234"))
+    tty_rows, tty_columns = int(cmd[0]), int(cmd[1])
+    return tty_rows, tty_columns
 
 
 def clear_terminal():
