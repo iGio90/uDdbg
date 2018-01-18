@@ -81,6 +81,12 @@ class CoreModule(AbstractUnicornDbgModule):
             'h': {
                 'ref': "help",
             },
+            'n': {
+                'ref': "next",
+            },
+            'ni': {
+                'ref': "next",
+            },
             'quit': {
                 'short': 'q',
                 'function': {
@@ -137,6 +143,14 @@ class CoreModule(AbstractUnicornDbgModule):
                     "f": "restore"
                 },
                 'help': 'set emulator to entry address and restore initial memory context'
+            },
+            'next': {
+                'short': 'n,ni',
+                'function': {
+                    "context": "core_module",
+                    "f": "next"
+                },
+                'help': 'next instruction'
             }
         }
 
@@ -324,6 +338,19 @@ class CoreModule(AbstractUnicornDbgModule):
             else:
                 print('please use \'set entry_point *offset\' to define an entry point')
         else:
+            self.core_instance.unicorndbg_instance.resume_emulation()
+
+    def next(self, func_name, *args):
+        current_address = self.core_instance.unicorndbg_instance.get_current_address()
+        if current_address == 0x0:
+            entry_point = self.core_instance.unicorndbg_instance.get_entry_point()
+            if entry_point > 0x0:
+                self.core_instance.unicorndbg_instance.soft_bp = True
+                self.core_instance.unicorndbg_instance.resume_emulation(entry_point)
+            else:
+                print('please use \'set entry_point *offset\' to define an entry point')
+        else:
+            self.core_instance.unicorndbg_instance.soft_bp = True
             self.core_instance.unicorndbg_instance.resume_emulation()
 
     def restore(self, func_name, *args):

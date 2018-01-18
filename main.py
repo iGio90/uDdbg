@@ -297,6 +297,7 @@ class UnicornDbg(object):
     def __init__(self, module_arr=None):
         self.arch = None
         self.mode = None
+        self.is_thumb = False
         self.cs_arch = None
         self.cs_mode = None
         self.emu_instance = None
@@ -325,6 +326,8 @@ class UnicornDbg(object):
         self.asm_module = self.get_module('asm_module')
         # last breakpoint
         self.last_bp = 0x0
+        self.soft_bp = False
+        self.soft_bp_addr = 0x0
 
     def dbg_hook_code(self, uc, address, size, user_data):
         """
@@ -332,13 +335,20 @@ class UnicornDbg(object):
         """
         self.current_address = address
 
-        if address != self.last_bp and address in self.core_module.get_breakpoints_list():
+        if self.soft_bp:
+            self.soft_bp = False
+            self.soft_bp_addr = address + size
+
+        if address != self.last_bp and \
+                (address in self.core_module.get_breakpoints_list() or
+                        address == self.soft_bp_addr):
             uc.emu_stop()
 
+            self.soft_bp_addr = 0x0
             self.last_bp = address
 
             print(utils.titlify('breakpoint'))
-            print('hit ' + utils.green_bold('breakpoint') + ' at: ' + utils.green_bold(hex(address)))
+            print('hit ' + utils.red_bold('breakpoint') + ' at: ' + utils.green_bold(hex(address)))
             self.register_module.registers('mem_invalid')
             print(utils.titlify('disasm'))
             pc = uc.reg_read(arm_const.UC_ARM_REG_PC)
@@ -385,6 +395,9 @@ class UnicornDbg(object):
 
         self.emu_instance = Uc(self.arch, self.mode)
 
+        if self.mode == UC_MODE_THUMB:
+            self.is_thumb = True
+
         # add hooks
         self.emu_instance.hook_add(UC_HOOK_CODE, self.dbg_hook_code)
         self.emu_instance.hook_add(UC_HOOK_MEM_INVALID, self.dbg_hook_mem_invalid)
@@ -428,9 +441,13 @@ class UnicornDbg(object):
                     self.entry_context['regs'][r] = \
                         self.emu_instance.reg_read(getattr(const, r))
 
-            self.emu_instance.emu_start(self.current_address, self.exit_point)
+            start_addr = self.current_address
+            if self.is_thumb:
+                start_addr = start_addr | 1
+            self.emu_instance.emu_start(start_addr, self.exit_point)
         else:
             print('please use \'set exit_point *offset\' to define an exit point')
+
 
     def restore(self):
         self.current_address = self.entry_point
