@@ -185,6 +185,7 @@ class UnicornDbgFunctions(object):
                 print("command '" + command + "' not found")
         except Exception as e:
             if isinstance(e, UcError):
+                print(utils.titlify('uc error'))
                 print(str(e))
             else:
                 print(utils.error_format('exec_command', str(e)))
@@ -318,15 +319,28 @@ class UnicornDbg(object):
             for module in module_arr:
                 self.add_module(module)
 
+        # hold some modules
+        self.core_module = self.get_module('core_module')
+        self.register_module = self.get_module('registers_module')
+        self.asm_module = self.get_module('asm_module')
+        # last breakpoint
+        self.last_bp = 0x0
+
     def dbg_hook_code(self, uc, address, size, user_data):
         """
         Unicorn instructions hook
         """
         self.current_address = address
 
-        if address in self.functions_instance.get_module('core_module').get_breakpoints_list():
-            print('hit breakpoint at: ' + hex(address))
-            uc.stop_emulation()
+        if address != self.last_bp and address in self.core_module.get_breakpoints_list():
+            uc.emu_stop()
+
+            print(utils.titlify('breakpoint'))
+            print('hit ' + utils.green_bold('breakpoint') + ' at: ' + utils.green_bold(hex(address)))
+            self.register_module.registers('mem_invalid')
+            print(utils.titlify('disasm'))
+            pc = uc.reg_read(arm_const.UC_ARM_REG_PC)
+            self.asm_module.internal_disassemble(uc.mem_read(pc - 0x16, 0x32), pc - 0x16, pc)
 
     def dbg_hook_mem_invalid(self, uc, access, address, size, value, userdata):
         """
@@ -337,10 +351,9 @@ class UnicornDbg(object):
         self.last_mem_invalid_size = size
 
         pc = uc.reg_read(arm_const.UC_ARM_REG_PC)
-        self.get_module('registers_module').registers('mem_invalid')
+        self.register_module.registers('mem_invalid')
         print(utils.titlify('disasm'))
-        self.get_module('asm_module').internal_disassemble(
-            uc.mem_read(pc, size), pc)
+        self.asm_module.internal_disassemble(uc.mem_read(pc - 0x16, 0x32), pc - 0x16, pc)
 
     def add_module(self, module):
         """
@@ -394,11 +407,22 @@ class UnicornDbg(object):
 
             if len(self.entry_context) == 0:
                 # store the initial memory context for the restart
+                self.entry_context = {
+                    'memory': {},
+                    'regs': {}
+                }
                 map_list = self.get_module('mappings_module').get_mappings()
                 for map in map_list:
                     map_address = int(map[1], 16)
                     map_len = map[2]
-                    self.entry_context[map_address] = bytes(self.emu_instance.mem_read(map_address, map_len))
+                    self.entry_context['memory'][map_address] = bytes(self.emu_instance.mem_read(map_address, map_len))
+                # registers
+                const = utils.get_arch_consts(self.arch)
+                regs = [k for k, v in const.__dict__.items() if
+                        not k.startswith("__") and k.index("_REG_") > 0]
+                for r in regs:
+                    self.entry_context['regs'][r] = \
+                        self.emu_instance.reg_read(getattr(const, r))
 
             self.emu_instance.emu_start(self.current_address, self.exit_point)
         else:
@@ -406,10 +430,14 @@ class UnicornDbg(object):
 
     def restore(self):
         self.current_address = self.entry_point
-        for addr in self.entry_context:
-            m = self.entry_context[addr]
+        for addr in self.entry_context['memory']:
+            m = self.entry_context['memory'][addr]
             self.emu_instance.mem_write(addr, m)
-        print('restored ' + str(len(self.entry_context)) + ' memory regions.')
+        print('restored ' + str(len(self.entry_context['memory'])) + ' memory regions.')
+        const = utils.get_arch_consts(self.arch)
+        for r in self.entry_context['regs']:
+            self.emu_instance.reg_write(getattr(const, r), self.entry_context['regs'][r])
+        print('restored ' + str(len(self.entry_context['regs'])) + ' registers.')
         print('emulator at ' + utils.green_bold(hex(self.current_address)))
 
     def stop_emulation(self):

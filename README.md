@@ -105,9 +105,9 @@ All the things which came useful for the new CoC encryption reverse engineering 
 
 > **map**
 >
-> manage mappings.
+> list mappings.
 >
->     map [list|map|unamp]
+>     map
 >
 
 ***
@@ -118,7 +118,7 @@ All the things which came useful for the new CoC encryption reverse engineering 
 >
 > memory operations.
 >
->     memory [dump|read|write]
+>     memory [dump|fwrite|map|read|write|unmap]
 >
 
 ***
@@ -167,7 +167,7 @@ All the things which came useful for the new CoC encryption reverse engineering 
 
 > **restore**
 >
-> Manageset emulator to entry address and restore initial memory context.
+> set emulator to entry address and restore initial memory context.
 >
 >     registers [read|write]
 >

@@ -27,7 +27,7 @@
 # Twitter: https://twitter.com/iGio90
 #
 #############################################################################
-
+import os
 from hexdump import hexdump
 from modules.unicorndbgmodule import AbstractUnicornDbgModule
 
@@ -42,7 +42,7 @@ class Memory(AbstractUnicornDbgModule):
             },
             'memory': {
                 'short': 'm',
-                'usage': 'memory [dump|read|write] [...]',
+                'usage': 'memory [dump|fwrite|map|read|write|unmap] [...]',
                 'help': 'memory operations',
                 'sub_commands': {
                     'd': {
@@ -53,6 +53,39 @@ class Memory(AbstractUnicornDbgModule):
                     },
                     'w': {
                         'ref': "write",
+                    },
+                    'fw': {
+                        'ref': "fwrite",
+                    },
+                    'm': {
+                        'ref': "map",
+                    },
+                    'u': {
+                        'ref': "unmap",
+                    },
+                    'um': {
+                        'ref': "unmap",
+                    },
+                    'umap': {
+                        'ref': "unmap",
+                    },
+                    'map': {
+                        'short': 'm',
+                        'usage': 'map *address *length [map name]',
+                        'help': 'map *length at *address',
+                        'function': {
+                            "context": "memory_module",
+                            "f": "map"
+                        }
+                    },
+                    'unmap': {
+                        'short': 'u,um',
+                        'usage': 'unmap [address] [length]',
+                        'help': 'unmap *length at *address',
+                        'function': {
+                            "context": "memory_module",
+                            "f": "unmap"
+                        }
                     },
                     'dump': {
                         'short': 'd',
@@ -81,9 +114,56 @@ class Memory(AbstractUnicornDbgModule):
                             "f": "write"
                         }
                     },
+                    'fwrite': {
+                        'short': 'fw',
+                        'usage': 'memory fwrite *offset *file_path',
+                        'help': 'write binary into offset',
+                        'function': {
+                            "context": "memory_module",
+                            "f": "fwrite"
+                        }
+                    }
                 }
             }
         }
+
+    def map(self, func_name, *args):
+        off = int(eval((args[0])))
+        lent = int(eval((args[1])))
+
+        p = None
+        if len(args) > 2:
+            p = str(args[2])
+
+        if off < 1024:
+            off += 1024 - (off % 1024)
+
+        if lent % 1024 is not 0:
+            lent += 1024 - (lent % 1024)
+
+        self.core_instance.get_emu_instance().mem_map(off, lent)
+        mappings = self.core_instance.get_module('mappings_module')
+        mappings.internal_add(off, lent, p)
+        print('mapped ' + str(lent) + ' at ' + hex(off))
+
+    def unmap(self, func_name, *args):
+        off = int(eval((args[0])))
+        lent = int(eval((args[1])))
+
+        if off < 1024:
+            off += 1024 - (off % 1024)
+
+        if lent % 1024 is not 0:
+            lent += 1024 - (lent % 1024)
+
+        self.core_instance.get_emu_instance().mem_unmap(off, lent)
+        mappings = self.core_instance.get_module('mappings_module').get_mappings()
+        for i in range(0, len(mappings)):
+            if mappings[i][1] == off:
+                map_lent = mappings[i][2]
+                if map_lent == lent:
+                    mappings.pop(i)
+        print('unmapped ' + str(lent) + ' at ' + hex(off))
 
     def dump(self, func_name, *args):
         off = int(eval((args[0])))
@@ -117,6 +197,16 @@ class Memory(AbstractUnicornDbgModule):
         pp = bytes.fromhex(args[1])
         self.internal_write(off, pp)
         print(str(len(pp)) + ' written to ' + hex(off))
+
+    def fwrite(self, func_name, *args):
+        off = int(eval((args[0])))
+        path = args[1]
+        if not os.path.isfile(path):
+            print('file not found or not accessible.')
+            return
+        with open(path, "rb") as bb:
+            self.internal_write(off, bb.read())
+            print(path + ' written to ' + hex(off))
 
     def internal_write(self, off, payload):
         self.core_instance.get_emu_instance().mem_write(off, payload)

@@ -138,11 +138,14 @@ class ASM(AbstractUnicornDbgModule):
                 a = hex(i.address)
                 print(utils.green_bold(a) + "\t%s\t%s" % (i.mnemonic, i.op_str))
 
-    def internal_disassemble(self, buf, off):
+    def internal_disassemble(self, buf, off, current_off=0):
         cs = self.core_instance.get_cs_instance()
         for i in cs.disasm(bytes(buf), off):
-            a = hex(i.address)
-            print(utils.green_bold(a) + "\t%s\t%s" % (i.mnemonic, i.op_str))
+            if i.address == current_off:
+                a = utils.red_bold(hex(i.address))
+            else:
+                a = utils.green_bold(hex(i.address))
+            print(a + "\t%s\t%s" % (i.mnemonic, i.op_str))
 
     def prompt_ks_arch(self):
         items = [k for k, v in keystone.__dict__.items() if not k.startswith("__") and k.startswith("KS_ARCH")]
