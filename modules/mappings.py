@@ -129,6 +129,9 @@ class Mappings(AbstractUnicornDbgModule):
     def internal_add(self, address, length, path=None):
         self.mappings.append([path, hex(address), length])
 
+    def get_mappings(self):
+        return self.mappings
+
     def init(self):
         pass
 

@@ -131,6 +131,13 @@ class CoreModule(AbstractUnicornDbgModule):
                 },
                 'help': 'loaded modules list'
             },
+            'restore': {
+                'function': {
+                    "context": "core_module",
+                    "f": "restore"
+                },
+                'help': 'set emulator to entry address and restore initial memory context'
+            }
         }
 
     def breakpoint(self, *args):
@@ -318,6 +325,9 @@ class CoreModule(AbstractUnicornDbgModule):
                 print('please use \'set entry_point *offset\' to define an entry point')
         else:
             self.core_instance.unicorndbg_instance.resume_emulation()
+
+    def restore(self, func_name, *args):
+        self.core_instance.unicorndbg_instance.restore()
 
     def get_breakpoints_list(self):
         return self.bp_list

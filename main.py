@@ -304,6 +304,7 @@ class UnicornDbg(object):
         self.exit_point = 0x0
         self.current_address = 0x0
         self.last_mem_invalid_size = 0x0
+        self.entry_context = {}
 
         self.history = InMemoryHistory()
 
@@ -390,9 +391,26 @@ class UnicornDbg(object):
 
         if self.exit_point > 0x0:
             print(utils.white_bold("emulation") + " started at " + utils.green_bold(hex(self.current_address)))
+
+            if len(self.entry_context) == 0:
+                # store the initial memory context for the restart
+                map_list = self.get_module('mappings_module').get_mappings()
+                for map in map_list:
+                    map_address = int(map[1], 16)
+                    map_len = map[2]
+                    self.entry_context[map_address] = bytes(self.emu_instance.mem_read(map_address, map_len))
+
             self.emu_instance.emu_start(self.current_address, self.exit_point)
         else:
             print('please use \'set exit_point *offset\' to define an exit point')
+
+    def restore(self):
+        self.current_address = self.entry_point
+        for addr in self.entry_context:
+            m = self.entry_context[addr]
+            self.emu_instance.mem_write(addr, m)
+        print('restored ' + str(len(self.entry_context)) + ' memory regions.')
+        print('emulator at ' + utils.green_bold(hex(self.current_address)))
 
     def stop_emulation(self):
         self.emu_instance.emu_stop()

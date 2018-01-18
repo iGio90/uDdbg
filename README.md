@@ -158,7 +158,16 @@ All the things which came useful for the new CoC encryption reverse engineering 
 >
 > *r, reg, regs*
 >
-> Manage registers or list main registers if no args.
+> manage registers or list main registers if no args.
+>
+>     registers [read|write]
+>
+
+***
+
+> **restore**
+>
+> Manageset emulator to entry address and restore initial memory context.
 >
 >     registers [read|write]
 >
