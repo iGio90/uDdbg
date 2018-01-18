@@ -335,12 +335,16 @@ class UnicornDbg(object):
         if address != self.last_bp and address in self.core_module.get_breakpoints_list():
             uc.emu_stop()
 
+            self.last_bp = address
+
             print(utils.titlify('breakpoint'))
             print('hit ' + utils.green_bold('breakpoint') + ' at: ' + utils.green_bold(hex(address)))
             self.register_module.registers('mem_invalid')
             print(utils.titlify('disasm'))
             pc = uc.reg_read(arm_const.UC_ARM_REG_PC)
             self.asm_module.internal_disassemble(uc.mem_read(pc - 0x16, 0x32), pc - 0x16, pc)
+        elif address == self.last_bp:
+            self.last_bp = 0
 
     def dbg_hook_mem_invalid(self, uc, access, address, size, value, userdata):
         """

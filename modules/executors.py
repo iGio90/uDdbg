@@ -60,7 +60,7 @@ class Executors(AbstractUnicornDbgModule):
                 'ref': "executors",
             },
             'executors': {
-                'short': 'r,reg,regs',
+                'short': 'e,ex,exec',
                 'help': 'manage executors',
                 'usage': 'exec [delete|load|new|run|save]',
                 'function': {
