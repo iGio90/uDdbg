@@ -83,6 +83,12 @@ class Executors(AbstractUnicornDbgModule):
                     'r': {
                         'ref': "run",
                     },
+                    's': {
+                        'ref': "save",
+                    },
+                    'n': {
+                        'ref': "new",
+                    },
                     'delete': {
                         'short': 'd,del',
                         'usage': 'exec delete *executors_id',
@@ -109,6 +115,24 @@ class Executors(AbstractUnicornDbgModule):
                             "context": "executors_module",
                             "f": "run_exec"
                         }
+                    },
+                    'save': {
+                        'short': 's',
+                        'usage': 'exec save *executors_id',
+                        'help': 'save an executor',
+                        'function': {
+                            "context": "executors_module",
+                            "f": "save_exec"
+                        }
+                    },
+                    'new': {
+                        'short': 'n',
+                        'usage': 'exec new',
+                        'help': 'create an executor',
+                        'function': {
+                            "context": "executors_module",
+                            "f": "new_exec"
+                        }
                     }
                 }
             }
@@ -129,13 +153,15 @@ class Executors(AbstractUnicornDbgModule):
         print(tabulate(r, h, tablefmt="simple"))
 
     def load_exec(self, func_name, *args):
-        f = args[0]
+        if not os.path.exists('executors'):
+            os.mkdir('executors')
+        f = 'executors/' + args[0]
         if not os.path.isfile(f):
-            print('file not found or not accessible')
+            print(f + ' not found.')
             return
         fp = open(f, 'r').read()
         cmd_arr = fp.split("\n")
-        key = f
+        key = args[0]
         id = len(self.executors_map)
         executor = {
             'id': id,
@@ -168,6 +194,48 @@ class Executors(AbstractUnicornDbgModule):
                 self.core_instance.batch_execute(cmd_arr)
         except Exception as e:
             print(utils.green_bold('usage: ') + 'exec run *executor_id')
+
+    def save_exec(self, func_name, *args):
+        try:
+            id = int(args[0])
+            if id not in self.executors_id_map:
+                print('executor not found')
+            else:
+                key = self.executors_id_map[id]
+                cmd_arr = self.executors_map[key]['cmd_list']
+                if not os.path.exists('executors'):
+                    os.mkdir('executors')
+                file_path = 'executors/' + key
+                if os.path.isfile(file_path):
+                    print('a file with the same name already exist in executors. aborting.')
+                    return
+                f = open(file_path, 'w')
+                for item in cmd_arr:
+                    f.write("%s\n" % item)
+                print('saved ' + utils.green_bold(str(len(cmd_arr)) + ' commands') +
+                      ' into ' + utils.green_bold(file_path))
+        except Exception as e:
+            print(utils.green_bold('usage: ') + 'exec save *executor_id')
+
+    def new_exec(self, func_name, *args):
+        key = input('executor name: ')
+        id = len(self.executors_id_map)
+        print('creating executor ' + utils.green_bold(str(id)) + '. add 1 command per line. type "end" to save')
+        cmd_arr = []
+        while True:
+            p = input('')
+            if p == 'end':
+                break
+            else:
+                if p:
+                    cmd_arr.append(p)
+        if len(cmd_arr) > 0:
+            executor = {
+                'id': id,
+                'cmd_list': cmd_arr
+            }
+            self.executors_map[key] = executor
+            self.executors_id_map[id] = key
 
     def init(self):
         pass

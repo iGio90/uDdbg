@@ -247,11 +247,11 @@ class UnicornDbgFunctions(object):
         :return:
         """
         try:
-            if len(commands_arr) > 0:
-                print(MENU_APIX + ' ' + colored("Batch execution of " + str(len(commands_arr)) + " commands", 'white',
-                                          attrs=['underline', 'bold']))
+            l = len(commands_arr)
+            if l > 0:
                 for com in commands_arr:
                     self.parse_command(com)
+                print('executed ' + utils.green_bold(str(l) + ' commands') + '.')
             else:
                 raise Exception
         except Exception as e:
@@ -322,7 +322,6 @@ class UnicornDbg(object):
         Unicorn instructions hook
         """
         self.current_address = address
-        self.instructions_count += 1
 
         if address in self.functions_instance.get_module('core_module').get_breakpoints_list():
             print('hit breakpoint at: ' + hex(address))
