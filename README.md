@@ -124,6 +124,17 @@ A gdb like debugger that provide a runtime env to unicorn emulator and additiona
 
 ***
 
+> **next**
+>
+> *n, ni*
+>
+> step instruction.
+>
+>     next
+>
+
+***
+
 > **patch**
 >
 > *p*
