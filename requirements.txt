@@ -1,0 +1,9 @@
+inquirer==2.2.0
+unicorn==1.0.1
+prompt_toolkit==1.0.14
+termcolor==1.1.0
+capstone==3.0.5rc2
+hexdump==3.3
+keystone_engine==0.9.1.post3
+tabulate==0.8.2
+keystone==0.2.1
