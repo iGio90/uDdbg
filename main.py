@@ -445,6 +445,7 @@ class UnicornDbg(object):
             if self.is_thumb:
                 start_addr = start_addr | 1
             self.emu_instance.emu_start(start_addr, self.exit_point)
+            print(utils.white_bold("emulation") + " finished with " + utils.green_bold("success"))
         else:
             print('please use \'set exit_point *offset\' to define an exit point')
 
