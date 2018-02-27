@@ -87,6 +87,9 @@ class CoreModule(AbstractUnicornDbgModule):
             'ni': {
                 'ref': "next",
             },
+            'p': {
+                'ref': "print",
+            },
             'quit': {
                 'short': 'q',
                 'function': {
@@ -151,6 +154,14 @@ class CoreModule(AbstractUnicornDbgModule):
                     "f": "next"
                 },
                 'help': 'next instruction'
+            },
+            'print': {
+                'short': 'p',
+                'function': {
+                    "context": "core_module",
+                    "f": "print"
+                },
+                'help': 'eval and print instruction'
             }
         }
 
@@ -358,6 +369,12 @@ class CoreModule(AbstractUnicornDbgModule):
 
     def get_breakpoints_list(self):
         return self.bp_list
+
+    def print(self, func_name, *args):
+        arr = ""
+        for a in args:
+            arr += a
+        print(utils.u_eval(self.core_instance, arr))
 
     def init(self):
         pass

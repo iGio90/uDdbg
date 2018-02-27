@@ -50,7 +50,7 @@ def titlify(text):
     Thanks -> https://github.com/hugsy/gef/blob/master/gef.py#L815
     """
     cols = get_terminal_size()[1]
-    nb = (cols - len(text) - 4)//2
+    nb = (cols - len(text) - 4) // 2
     msg = [white_bold("-" * nb + '[ '),
            green_bold(text),
            white_bold(' ]' + "-" * nb)]
@@ -211,3 +211,14 @@ def indexof(str, str_search):
             return str.index(str_search)
     except Exception:
         return -1
+
+
+def u_eval(core_instance, val):
+    val = str(val)
+    if val.startswith('$'):
+        reg = val[1:].upper()
+        val = core_instance.get_module('registers_module').read_register(reg)
+        if val is None:
+            raise Exception('register not found')
+        return val
+    return int(eval(val))

@@ -40,7 +40,6 @@ class Patches(AbstractUnicornDbgModule):
         self.context_name = "patches_module"
         self.command_map = {
             'patch': {
-                'short': 'p',
                 'help': 'Patches',
                 'usage': 'patch [list|add|remove|toggle] [...]',
                 'sub_commands': {

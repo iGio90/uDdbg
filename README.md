@@ -137,8 +137,6 @@ A gdb like debugger that provide a runtime env to unicorn emulator and additiona
 
 > **patch**
 >
-> *p*
->
 > manage patches.
 >
 >     patch [list|add|remove|toggle]

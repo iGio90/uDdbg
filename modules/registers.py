@@ -163,20 +163,26 @@ class Registers(AbstractUnicornDbgModule):
         print(hex(value) + ' written into ' + str(args[0]).upper())
 
     def read(self, func_name, *args):
-        arch = self.core_instance.unicorndbg_instance.get_arch()
-        try:
-            register = getattr(utils.get_arch_consts(arch), utils.get_reg_tag(arch) + str(args[0]).upper())
-        except Exception as e:
+        reg = str(args[0]).upper()
+        value = self.read_register(reg)
+        if value is None:
             raise Exception('register not found')
 
-        value = self.core_instance.get_emu_instance().reg_read(register)
-        r = [str(args[0]).upper(), hex(value), value]
+        r = [[utils.green_bold(reg), hex(value), str(value)]]
         h = [utils.white_bold_underline('register'),
              utils.white_bold_underline('hex'),
              utils.white_bold_underline('decimal')]
         print('')
         print(tabulate(r, h, tablefmt="simple"))
         print('')
+
+    def read_register(self, reg):
+        arch = self.core_instance.unicorndbg_instance.get_arch()
+        try:
+            register = getattr(utils.get_arch_consts(arch), utils.get_reg_tag(arch) + reg)
+        except Exception as e:
+            return None
+        return self.core_instance.get_emu_instance().reg_read(register)
 
     def init(self):
         pass
