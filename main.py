@@ -331,6 +331,8 @@ class UnicornDbg(object):
         # mem access
         self.mem_access_result = None
         self.hook_mem_access = False
+        # hold last command
+        self.last_command = None
 
     def dbg_hook_code(self, uc, address, size, user_data):
         """
@@ -430,6 +432,15 @@ class UnicornDbg(object):
         while True:
             print(main_apix, end='', flush=True)
             text = prompt('', history=self.history, auto_suggest=AutoSuggestFromHistory())
+
+            print(len(text))
+            # only grant the use of empty command to replicate the last command while in cli. No executors
+            if len(text) == 0 and self.last_command is not None:
+                self.functions_instance.parse_command(self.last_command)
+                continue
+
+            self.last_command = text
+
             # send command to the parser
             self.functions_instance.parse_command(text)
 
