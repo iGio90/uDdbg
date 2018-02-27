@@ -433,7 +433,6 @@ class UnicornDbg(object):
             print(main_apix, end='', flush=True)
             text = prompt('', history=self.history, auto_suggest=AutoSuggestFromHistory())
 
-            print(len(text))
             # only grant the use of empty command to replicate the last command while in cli. No executors
             if len(text) == 0 and self.last_command is not None:
                 self.functions_instance.parse_command(self.last_command)
