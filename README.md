@@ -170,7 +170,7 @@ A gdb like debugger that provide a runtime env to unicorn emulator and additiona
 >
 > set emulator to entry address and restore initial memory context.
 >
->     registers [read|write]
+>     restore
 >
 
 ***
