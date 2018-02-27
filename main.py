@@ -328,6 +328,9 @@ class UnicornDbg(object):
         self.last_bp = 0x0
         self.soft_bp = False
         self.soft_bp_addr = 0x0
+        # mem access
+        self.mem_access_result = None
+        self.hook_mem_access = False
 
     def dbg_hook_code(self, uc, address, size, user_data):
         """
@@ -336,12 +339,13 @@ class UnicornDbg(object):
         self.current_address = address
 
         if self.soft_bp:
+            self.hook_mem_access = True
             self.soft_bp = False
             self.soft_bp_addr = address + size
 
         if address != self.last_bp and \
                 (address in self.core_module.get_breakpoints_list() or
-                        address == self.soft_bp_addr):
+                 address == self.soft_bp_addr):
             uc.emu_stop()
 
             self.soft_bp_addr = 0x0
@@ -353,8 +357,21 @@ class UnicornDbg(object):
             print(utils.titlify('disasm'))
             pc = uc.reg_read(arm_const.UC_ARM_REG_PC)
             self.asm_module.internal_disassemble(uc.mem_read(pc - 0x16, 0x32), pc - 0x16, pc)
+            if self.mem_access_result is not None:
+                val = utils.red_bold("\t> 0x%x" % self.mem_access_result[1])
+                ad = utils.green_bold("\t0x%x" % self.mem_access_result[0])
+                print(utils.titlify("memory access"))
+                print(utils.white_bold("WRITE") + val + ad)
+                self.hook_mem_access = None
         elif address == self.last_bp:
             self.last_bp = 0
+
+    def dbg_hook_mem_access(self, uc, access, address, size, value, user_data):
+        print("mem access: " + str(self.hook_mem_access))
+        if self.hook_mem_access:
+            self.hook_mem_access = False
+            # store to ensure a print after disasm
+            self.mem_access_result = [address, value]
 
     def dbg_hook_mem_invalid(self, uc, access, address, size, value, userdata):
         """
@@ -400,6 +417,7 @@ class UnicornDbg(object):
 
         # add hooks
         self.emu_instance.hook_add(UC_HOOK_CODE, self.dbg_hook_code)
+        self.emu_instance.hook_add(UC_HOOK_MEM_WRITE, self.dbg_hook_mem_access)
         self.emu_instance.hook_add(UC_HOOK_MEM_INVALID, self.dbg_hook_mem_invalid)
 
         utils.clear_terminal()
@@ -448,7 +466,6 @@ class UnicornDbg(object):
             print(utils.white_bold("emulation") + " finished with " + utils.green_bold("success"))
         else:
             print('please use \'set exit_point *offset\' to define an exit point')
-
 
     def restore(self):
         self.current_address = self.entry_point
