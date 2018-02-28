@@ -327,7 +327,7 @@ class UnicornDbg(object):
         # last breakpoint
         self.last_bp = 0x0
         self.soft_bp = False
-        self.soft_bp_addr = 0x0
+        self.has_soft_bp = False
         # mem access
         self.mem_access_result = None
         self.hook_mem_access = False
@@ -340,36 +340,31 @@ class UnicornDbg(object):
         """
         self.current_address = address
 
+        hit_soft_bp = False
+
         if self.soft_bp:
             self.hook_mem_access = True
             self.soft_bp = False
-            self.soft_bp_addr = address + size
+            hit_soft_bp = True
 
         if address != self.last_bp and \
                 (address in self.core_module.get_breakpoints_list() or
-                 address == self.soft_bp_addr):
+                 self.has_soft_bp):
             uc.emu_stop()
 
-            self.soft_bp_addr = 0x0
             self.last_bp = address
 
             print(utils.titlify('breakpoint'))
             print('hit ' + utils.red_bold('breakpoint') + ' at: ' + utils.green_bold(hex(address)))
-            self.register_module.registers('mem_invalid')
-            print(utils.titlify('disasm'))
-            pc = uc.reg_read(arm_const.UC_ARM_REG_PC)
-            self.asm_module.internal_disassemble(uc.mem_read(pc - 0x16, 0x32), pc - 0x16, pc)
-            if self.mem_access_result is not None:
-                val = utils.red_bold("\t> 0x%x" % self.mem_access_result[1])
-                ad = utils.green_bold("\t0x%x" % self.mem_access_result[0])
-                print(utils.titlify("memory access"))
-                print(utils.white_bold("WRITE") + val + ad)
-                self.hook_mem_access = None
+            self._print_context(uc)
         elif address == self.last_bp:
             self.last_bp = 0
+        self.has_soft_bp = hit_soft_bp
+        if self.current_address + size == self.exit_point:
+            self._print_context(uc)
+            print(utils.white_bold("emulation") + " finished with " + utils.green_bold("success"))
 
     def dbg_hook_mem_access(self, uc, access, address, size, value, user_data):
-        print("mem access: " + str(self.hook_mem_access))
         if self.hook_mem_access:
             self.hook_mem_access = False
             # store to ensure a print after disasm
@@ -387,6 +382,18 @@ class UnicornDbg(object):
         self.register_module.registers('mem_invalid')
         print(utils.titlify('disasm'))
         self.asm_module.internal_disassemble(uc.mem_read(pc - 0x16, 0x32), pc - 0x16, pc)
+
+    def _print_context(self, uc):
+        self.register_module.registers('mem_invalid')
+        print(utils.titlify('disasm'))
+        pc = uc.reg_read(arm_const.UC_ARM_REG_PC)
+        self.asm_module.internal_disassemble(uc.mem_read(pc - 0x16, 0x32), pc - 0x16, pc)
+        if self.mem_access_result is not None:
+            val = utils.red_bold("\t0x%x" % self.mem_access_result[1])
+            ad = utils.green_bold("\t> 0x%x" % self.mem_access_result[0])
+            print(utils.titlify("memory access"))
+            print(utils.white_bold("WRITE") + val + ad)
+            self.hook_mem_access = None
 
     def add_module(self, module):
         """
@@ -473,8 +480,6 @@ class UnicornDbg(object):
             if self.is_thumb:
                 start_addr = start_addr | 1
             self.emu_instance.emu_start(start_addr, self.exit_point)
-            if self.current_address == self.exit_point:
-                print(utils.white_bold("emulation") + " finished with " + utils.green_bold("success"))
         else:
             print('please use \'set exit_point *offset\' to define an exit point')
 
