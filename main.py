@@ -394,6 +394,7 @@ class UnicornDbg(object):
             print(utils.titlify("memory access"))
             print(utils.white_bold("WRITE") + val + ad)
             self.hook_mem_access = None
+            self.mem_access_result = None
 
     def add_module(self, module):
         """
