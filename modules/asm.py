@@ -145,7 +145,8 @@ class ASM(AbstractUnicornDbgModule):
                 a = utils.red_bold(hex(i.address))
             else:
                 a = utils.green_bold(hex(i.address))
-            print(a + "\t%s\t%s" % (i.mnemonic, i.op_str))
+            print(a + "\t%s\t%s" % ((utils.white_bold(str(i.mnemonic).upper()),
+                                    str(i.op_str).upper().replace('X', 'x'))))
 
     def prompt_ks_arch(self):
         items = [k for k, v in keystone.__dict__.items() if not k.startswith("__") and k.startswith("KS_ARCH")]

@@ -307,6 +307,7 @@ class UnicornDbg(object):
         self.current_address = 0x0
         self.last_mem_invalid_size = 0x0
         self.entry_context = {}
+        self.trace_instructions = 0x0
 
         self.history = InMemoryHistory()
 
@@ -341,6 +342,7 @@ class UnicornDbg(object):
         self.current_address = address
 
         hit_soft_bp = False
+        should_print_instruction = self.trace_instructions > 0
 
         if self.soft_bp:
             self.hook_mem_access = True
@@ -350,6 +352,7 @@ class UnicornDbg(object):
         if address != self.last_bp and \
                 (address in self.core_module.get_breakpoints_list() or
                  self.has_soft_bp):
+            should_print_instruction = False
             uc.emu_stop()
 
             self.last_bp = address
@@ -361,8 +364,11 @@ class UnicornDbg(object):
             self.last_bp = 0
         self.has_soft_bp = hit_soft_bp
         if self.current_address + size == self.exit_point:
+            should_print_instruction = False
             self._print_context(uc)
             print(utils.white_bold("emulation") + " finished with " + utils.green_bold("success"))
+        if should_print_instruction:
+            self.asm_module.internal_disassemble(uc.mem_read(address, size), address)
 
     def dbg_hook_mem_access(self, uc, access, address, size, value, user_data):
         if self.hook_mem_access:

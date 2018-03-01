@@ -47,7 +47,8 @@ class Configs(AbstractUnicornDbgModule):
             'entry_point': 0x0,
             'exit_point': 0x0,
             'ks_arch': '',
-            'ks_mode': ''
+            'ks_mode': '',
+            'print_instructions': 0
         }
 
         self.context_name = "configs_module"
@@ -131,7 +132,12 @@ class Configs(AbstractUnicornDbgModule):
                     raise Exception('mode not found')
                 self.configs_map[key] = 'KS_MODE_' + str(args[1]).upper()
                 self.core_instance.get_module('asm_module').set_ks_mode(mode)
-
+            elif key == 'print_instructions':
+                value = int(value)
+                if value > 1:
+                    value = 1
+                self.configs_map[key] = value
+                self.core_instance.get_dbg_instance().trace_instructions = value
             else:
                 self.configs_map[key] = value
 
