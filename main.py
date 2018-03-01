@@ -172,7 +172,7 @@ class UnicornDbgFunctions(object):
                     context = self.context_map[com["function"]["context"]]
                     funct = com["function"]["f"]
                     call_method = getattr(context, funct)
-                    # we pass the command name (could be usefull for the called function)
+                    # we pass the command name (could be useful for the called function)
                     # and possible arguments to the function
                     call_method(command, *args)
                 else:
