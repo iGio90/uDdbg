@@ -308,6 +308,7 @@ class UnicornDbg(object):
         self.last_mem_invalid_size = 0x0
         self.entry_context = {}
         self.trace_instructions = 0x0
+        self.skip_bp_count = 0x0
 
         self.history = InMemoryHistory()
 
@@ -352,14 +353,17 @@ class UnicornDbg(object):
         if address != self.last_bp and \
                 (address in self.core_module.get_breakpoints_list() or
                  self.has_soft_bp):
-            should_print_instruction = False
-            uc.emu_stop()
+            if self.skip_bp_count > 0:
+                self.skip_bp_count -= 1
+            else:
+                should_print_instruction = False
+                uc.emu_stop()
 
-            self.last_bp = address
+                self.last_bp = address
 
-            print(utils.titlify('breakpoint'))
-            print('hit ' + utils.red_bold('breakpoint') + ' at: ' + utils.green_bold(hex(address)))
-            self._print_context(uc)
+                print(utils.titlify('breakpoint'))
+                print('hit ' + utils.red_bold('breakpoint') + ' at: ' + utils.green_bold(hex(address)))
+                self._print_context(uc)
         elif address == self.last_bp:
             self.last_bp = 0
         self.has_soft_bp = hit_soft_bp
@@ -457,9 +461,11 @@ class UnicornDbg(object):
             # send command to the parser
             self.functions_instance.parse_command(text)
 
-    def resume_emulation(self, address=0x0):
+    def resume_emulation(self, address=0x0, skip_bp=0):
         if address > 0x0:
             self.current_address = address
+
+        self.skip_bp_count = skip_bp
 
         if self.exit_point > 0x0:
             print(utils.white_bold("emulation") + " started at " + utils.green_bold(hex(self.current_address)))

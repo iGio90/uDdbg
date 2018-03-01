@@ -342,14 +342,21 @@ class CoreModule(AbstractUnicornDbgModule):
 
     def continue_exec(self, func_name, *args):
         current_address = self.core_instance.unicorndbg_instance.get_current_address()
+        skip_bp = 0
+        try:
+            skip_bp = int(utils.u_eval(self.core_instance, args[0]))
+        except Exception as e:
+            pass
+
         if current_address == 0x0:
             entry_point = self.core_instance.unicorndbg_instance.get_entry_point()
             if entry_point > 0x0:
-                self.core_instance.unicorndbg_instance.resume_emulation(entry_point)
+                self.core_instance.unicorndbg_instance.resume_emulation(address=entry_point,
+                                                                        skip_bp=skip_bp)
             else:
                 print('please use \'set entry_point *offset\' to define an entry point')
         else:
-            self.core_instance.unicorndbg_instance.resume_emulation()
+            self.core_instance.unicorndbg_instance.resume_emulation(skip_bp=skip_bp)
 
     def next(self, func_name, *args):
         current_address = self.core_instance.unicorndbg_instance.get_current_address()
