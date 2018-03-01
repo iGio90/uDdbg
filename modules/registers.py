@@ -158,7 +158,7 @@ class Registers(AbstractUnicornDbgModule):
         except Exception as e:
             raise Exception('register not found')
 
-        value = int(eval((args[1])))
+        value = utils.u_eval(self.core_instance, args[1])
         self.core_instance.get_emu_instance().reg_write(register, value)
         print(hex(value) + ' written into ' + str(args[0]).upper())
 

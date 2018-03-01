@@ -166,7 +166,7 @@ class CoreModule(AbstractUnicornDbgModule):
         }
 
     def breakpoint(self, *args):
-        off = int(eval((args[1])))
+        off = utils.u_eval(self.core_instance, args[1])
         if off not in self.bp_list:
             self.bp_list.append(off)
             print('breakpoint added at: ' + hex(off))
@@ -174,7 +174,7 @@ class CoreModule(AbstractUnicornDbgModule):
             print('breakpoint already set at ' + hex(off))
 
     def rm_breakpoint(self, *args):
-        off = int(eval((args[1])))
+        off = utils.u_eval(self.core_instance, args[1])
         if off in self.bp_list:
             self.bp_list.remove(off)
             print('breakpoint at ' + hex(off) + ' removed.')
@@ -344,7 +344,7 @@ class CoreModule(AbstractUnicornDbgModule):
         current_address = self.core_instance.unicorndbg_instance.get_current_address()
         skip_bp = 0
         try:
-            skip_bp = int(utils.u_eval(self.core_instance, args[0]))
+            skip_bp = utils.u_eval(self.core_instance, args[0])
         except Exception as e:
             pass
 

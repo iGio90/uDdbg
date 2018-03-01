@@ -29,6 +29,8 @@
 #############################################################################
 import os
 from hexdump import hexdump
+
+import utils
 from modules.unicorndbgmodule import AbstractUnicornDbgModule
 
 
@@ -128,8 +130,8 @@ class Memory(AbstractUnicornDbgModule):
         }
 
     def map(self, func_name, *args):
-        off = int(eval((args[0])))
-        lent = int(eval((args[1])))
+        off = utils.u_eval(self.core_instance, args[0])
+        lent = utils.u_eval(self.core_instance, args[1])
 
         p = None
         if len(args) > 2:
@@ -147,8 +149,8 @@ class Memory(AbstractUnicornDbgModule):
         print('mapped ' + str(lent) + ' at ' + hex(off))
 
     def unmap(self, func_name, *args):
-        off = int(eval((args[0])))
-        lent = int(eval((args[1])))
+        off = utils.u_eval(self.core_instance, args[0])
+        lent = utils.u_eval(self.core_instance, args[1])
 
         if off < 1024:
             off += 1024 - (off % 1024)
@@ -166,8 +168,8 @@ class Memory(AbstractUnicornDbgModule):
         print('unmapped ' + str(lent) + ' at ' + hex(off))
 
     def dump(self, func_name, *args):
-        off = int(eval((args[0])))
-        lent = int(eval((args[1])))
+        off = utils.u_eval(self.core_instance, args[0])
+        lent = utils.u_eval(self.core_instance, args[1])
         file_name = args[3]
         b = self.core_instance.get_emu_instance().mem_read(off, lent)
         with open(file_name, 'wb') as f:
@@ -175,8 +177,8 @@ class Memory(AbstractUnicornDbgModule):
         print(str(lent) + ' written to ' + file_name + '.')
 
     def read(self, func_name, *args):
-        off = int(eval((args[0])))
-        lent = int(eval((args[1])))
+        off = utils.u_eval(self.core_instance, args[0])
+        lent = utils.u_eval(self.core_instance, args[1])
         format = 'h'
         if len(args) > 2:
             format = args[2]
@@ -193,13 +195,13 @@ class Memory(AbstractUnicornDbgModule):
             print("\t" + 'i: asm')
 
     def write(self, func_name, *args):
-        off = int(eval((args[0])))
+        off = utils.u_eval(self.core_instance, args[0])
         pp = bytes.fromhex(args[1])
         self.internal_write(off, pp)
         print(str(len(pp)) + ' written to ' + hex(off))
 
     def fwrite(self, func_name, *args):
-        off = int(eval((args[0])))
+        off = utils.u_eval(self.core_instance, args[0])
         path = args[1]
         if not os.path.isfile(path):
             print('file not found or not accessible.')

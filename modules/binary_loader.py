@@ -30,6 +30,7 @@
 
 import os
 
+import utils
 from modules.unicorndbgmodule import AbstractUnicornDbgModule
 
 
@@ -56,7 +57,7 @@ class BinaryLoader(AbstractUnicornDbgModule):
         path = args[0]
         if os.path.isfile(path):
             p = open(path, 'rb').read()
-            off = int(eval((args[1])))
+            off = utils.u_eval(self.core_instance, args[1])
             binary_len = len(p)
 
             if off < 1024:

@@ -102,7 +102,7 @@ class Patches(AbstractUnicornDbgModule):
         print(tabulate(self.patches, h, tablefmt="simple"))
 
     def add(self, func_name, *args):
-        off = int(eval((args[0])))
+        off = utils.u_eval(self.core_instance, args[0])
         pp = bytes.fromhex(args[1])
         pp_len = len(pp)
 
@@ -119,7 +119,7 @@ class Patches(AbstractUnicornDbgModule):
         print('patch created and written to ' + hex(off))
 
     def remove(self, func_name, *args):
-        off = int(eval((args[0])))
+        off = utils.u_eval(self.core_instance, args[0])
         for i in range(0, len(self.patches)):
             p = self.patches[i]
             if p[0] == off:
@@ -129,7 +129,7 @@ class Patches(AbstractUnicornDbgModule):
         print('no patch found at ' + hex(off))
 
     def toggle(self, func_name, *args):
-        off = int(eval((args[0])))
+        off = utils.u_eval(self.core_instance, args[0])
         for i in range(0, len(self.patches)):
             p = self.patches[i]
             if p[0] == off:

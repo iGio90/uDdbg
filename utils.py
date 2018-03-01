@@ -215,10 +215,13 @@ def indexof(str, str_search):
 
 def u_eval(core_instance, val):
     val = str(val)
-    if val.startswith('$'):
-        reg = val[1:].upper()
-        val = core_instance.get_module('registers_module').read_register(reg)
-        if val is None:
-            raise Exception('register not found')
-        return val
+    r = r"([$@][a-z0-9]+)(\W|$)"
+    m = re.finditer(r, val)
+    for n, match in enumerate(m):
+        if len(match.groups()) > 0:
+            v = match.group(1)
+            if v.startswith("$"):
+                rv = core_instance.get_module('registers_module').read_register(v[1:].upper())
+                if rv:
+                    val = val.replace(v, str(rv))
     return int(eval(val))
