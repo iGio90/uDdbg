@@ -39,6 +39,7 @@ from prompt_toolkit.history import InMemoryHistory
 from prompt_toolkit.shortcuts import prompt
 from termcolor import colored
 from unicorn import *
+
 import sys
 import utils
 import copy
@@ -330,6 +331,7 @@ class UnicornDbg(object):
         self.last_bp = 0x0
         self.soft_bp = False
         self.has_soft_bp = False
+        self.breakpoint_count = 0x0
         # mem access
         self.mem_access_result = None
         self.hook_mem_access = False
@@ -356,13 +358,16 @@ class UnicornDbg(object):
             if self.skip_bp_count > 0:
                 self.skip_bp_count -= 1
             else:
+                self.breakpoint_count += 1
                 should_print_instruction = False
                 uc.emu_stop()
 
                 self.last_bp = address
 
                 print(utils.titlify('breakpoint'))
-                print('hit ' + utils.red_bold('breakpoint') + ' at: ' + utils.green_bold(hex(address)))
+                print('[' + utils.white_bold(str(self.breakpoint_count)) +
+                      ']' + ' hit ' + utils.red_bold('breakpoint') +
+                      ' at: ' + utils.green_bold(hex(address)))
                 self._print_context(uc)
         elif address == self.last_bp:
             self.last_bp = 0
