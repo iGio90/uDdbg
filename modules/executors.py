@@ -161,9 +161,15 @@ class Executors(AbstractUnicornDbgModule):
             return
         fp = open(f, 'r').read()
         cmd_arr = fp.split("\n")
+        try:
+            while cmd_arr.index('') > 0:
+                cmd_arr.remove('')
+        except:
+            pass
         for c in cmd_arr:
-            if str(c).startswith("#") or str(c).startswith("//"):
+            if c[:2] == '//' or c[:2] == '#':
                 cmd_arr.remove(c)
+
         key = args[0]
         id = len(self.executors_map)
         executor = {
