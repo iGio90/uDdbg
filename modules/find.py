@@ -82,7 +82,7 @@ class Find(AbstractUnicornDbgModule):
 
         b = self.core_instance.get_emu_instance().mem_read(start, size - (map_start - start))
         for match_obj in match.finditer(b):
-            offset = match_obj.start()
+            offset = match_obj.start() + map_start
             result.append([hex(offset)])
 
         print(utils.titlify('find'))
