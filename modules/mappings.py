@@ -50,6 +50,7 @@ class Mappings(AbstractUnicornDbgModule):
         }
 
     def list(self, func_name, *args):
+        print(utils.titlify('mappings'))
         h = [utils.white_bold_underline('path'),
              utils.white_bold_underline('address'),
              utils.white_bold_underline('length')]

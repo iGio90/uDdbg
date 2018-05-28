@@ -174,7 +174,7 @@ class Memory(AbstractUnicornDbgModule):
         b = self.core_instance.get_emu_instance().mem_read(off, lent)
         with open(file_name, 'wb') as f:
             f.write(b)
-        print(str(lent) + ' written to ' + file_name + '.')
+        print(str(lent) + ' bytes written to ' + file_name + '.')
 
     def read(self, func_name, *args):
         off = utils.u_eval(self.core_instance, args[0])
@@ -198,7 +198,7 @@ class Memory(AbstractUnicornDbgModule):
         off = utils.u_eval(self.core_instance, args[0])
         pp = bytes.fromhex(args[1])
         self.internal_write(off, pp)
-        print(str(len(pp)) + ' written to ' + hex(off))
+        print(str(len(pp)) + ' bytes written to ' + hex(off))
 
     def fwrite(self, func_name, *args):
         off = utils.u_eval(self.core_instance, args[0])
@@ -208,7 +208,7 @@ class Memory(AbstractUnicornDbgModule):
             return
         with open(path, "rb") as bb:
             self.internal_write(off, bb.read())
-            print(path + ' written to ' + hex(off))
+            print(path + ' bytes written to ' + hex(off))
 
     def internal_write(self, off, payload):
         self.core_instance.get_emu_instance().mem_write(off, payload)
