@@ -32,6 +32,8 @@ import capstone
 
 from capstone import *
 
+from typing import List, Tuple
+
 from modules.core_module import CoreModule
 from modules import binary_loader, memory, module_test, registers, mappings, patches, asm, configs, executors, find
 from prompt_toolkit.auto_suggest import AutoSuggestFromHistory
@@ -39,6 +41,7 @@ from prompt_toolkit.history import InMemoryHistory
 from prompt_toolkit.shortcuts import prompt
 from termcolor import colored
 from unicorn import *
+from unicorn import unicorn_const
 
 import sys
 import utils
@@ -77,9 +80,6 @@ class UnicornDbgFunctions(object):
 
         mappings_module = mappings.Mappings(self)
         self.add_module(mappings_module)
-
-        binary_loader_module = binary_loader.BinaryLoader(self)
-        self.add_module(binary_loader_module)
 
         memory_module = memory.Memory(self)
         self.add_module(memory_module)
@@ -304,10 +304,10 @@ class UnicornDbg(object):
         self.is_thumb = False
         self.cs_arch = None
         self.cs_mode = None
-        self.emu_instance = None
+        self.emu_instance = None # type: Uc
         self.cs = None
-        self.entry_point = 0x0
-        self.exit_point = 0x0
+        self.entry_point = None
+        self.exit_point = None
         self.current_address = 0x0
         self.last_mem_invalid_size = 0x0
         self.entry_context = {}
@@ -345,42 +345,48 @@ class UnicornDbg(object):
         """
         Unicorn instructions hook
         """
-        self.current_address = address
+        try: 
+            self.current_address = address
 
-        hit_soft_bp = False
-        should_print_instruction = self.trace_instructions > 0
+            hit_soft_bp = False
+            should_print_instruction = self.trace_instructions > 0
 
-        if self.soft_bp:
-            self.hook_mem_access = True
-            self.soft_bp = False
-            hit_soft_bp = True
+            if self.soft_bp:
+                self.hook_mem_access = True
+                self.soft_bp = False
+                hit_soft_bp = True
 
-        if address != self.last_bp and \
-                (address in self.core_module.get_breakpoints_list() or
-                 self.has_soft_bp):
-            if self.skip_bp_count > 0:
-                self.skip_bp_count -= 1
-            else:
-                self.breakpoint_count += 1
+            if address != self.last_bp and \
+                    (address in self.core_module.get_breakpoints_list() or
+                    self.has_soft_bp):
+                if self.skip_bp_count > 0:
+                    self.skip_bp_count -= 1
+                else:
+                    self.breakpoint_count += 1
+                    should_print_instruction = False
+                    uc.emu_stop()
+
+                    self.last_bp = address
+
+                    print(utils.titlify('breakpoint'))
+                    print('[' + utils.white_bold(str(self.breakpoint_count)) +
+                        ']' + ' hit ' + utils.red_bold('breakpoint') +
+                        ' at: ' + utils.green_bold(hex(address)))
+                    self._print_context(uc, address)
+            elif address == self.last_bp:
+                self.last_bp = 0
+            self.has_soft_bp = hit_soft_bp
+            if self.current_address + size == self.exit_point:
                 should_print_instruction = False
-                uc.emu_stop()
-
-                self.last_bp = address
-
-                print(utils.titlify('breakpoint'))
-                print('[' + utils.white_bold(str(self.breakpoint_count)) +
-                      ']' + ' hit ' + utils.red_bold('breakpoint') +
-                      ' at: ' + utils.green_bold(hex(address)))
-                self._print_context(uc)
-        elif address == self.last_bp:
-            self.last_bp = 0
-        self.has_soft_bp = hit_soft_bp
-        if self.current_address + size == self.exit_point:
-            should_print_instruction = False
-            self._print_context(uc)
-            print(utils.white_bold("emulation") + " finished with " + utils.green_bold("success"))
-        if should_print_instruction:
-            self.asm_module.internal_disassemble(uc.mem_read(address, size), address)
+                self._print_context(uc, address)
+                print(utils.white_bold("emulation") + " finished with " + utils.green_bold("success"))
+            if should_print_instruction:
+                self.asm_module.internal_disassemble(uc.mem_read(address, size), address)
+        except KeyboardInterrupt as ex:
+            # If stuck in an endless loop, we can exit here :). TODO: does that mean ctrl+c never works for targets?
+            print(utils.titlify('paused'))
+            self._print_context(uc, address)
+            uc.emu_stop()
 
     def dbg_hook_mem_access(self, uc, access, address, size, value, user_data):
         if self.hook_mem_access:
@@ -388,23 +394,21 @@ class UnicornDbg(object):
             # store to ensure a print after disasm
             self.mem_access_result = [address, value]
 
-    def dbg_hook_mem_invalid(self, uc, access, address, size, value, userdata):
+    def dbg_hook_mem_invalid(self, uc: Uc, access, address, size, value, userdata):
         """
         Unicorn mem invalid hook
         """
         if size < 2:
             size = self.last_mem_invalid_size
         self.last_mem_invalid_size = size
-
-        pc = uc.reg_read(arm_const.UC_ARM_REG_PC)
         self.register_module.registers('mem_invalid')
         print(utils.titlify('disasm'))
-        self.asm_module.internal_disassemble(uc.mem_read(pc - 0x16, 0x32), pc - 0x16, pc)
+        start = max(0, self.pc - 0x16)
+        self.asm_module.internal_disassemble(uc.mem_read(start, 0x32), start, address)
 
-    def _print_context(self, uc):
+    def _print_context(self, uc, pc):
         self.register_module.registers('mem_invalid')
         print(utils.titlify('disasm'))
-        pc = uc.reg_read(arm_const.UC_ARM_REG_PC)
         self.asm_module.internal_disassemble(uc.mem_read(pc - 0x16, 0x32), pc - 0x16, pc)
         if self.mem_access_result is not None:
             val = utils.red_bold("\t0x%x" % self.mem_access_result[1])
@@ -421,32 +425,103 @@ class UnicornDbg(object):
         """
         self.functions_instance.add_module(module)
 
-    def start(self, arch=None, mode=None):
+    def initialize(self, emu_instance: Uc=None, arch=None, mode=None, hide_binary_loader=False,
+            entry_point=None, exit_point=None, mappings: List[Tuple[str, int, int]]=None) -> Uc:
         """
-        main start function, here we handle the command get loop and unicorn istance creation
+        Initializes the emulator with all needed hooks. 
+        Will return the unicorn emu_instance ready to go. 
+        This method can be called from external scripts to to embed udbg.
+        To kick off emulation, run start().
+        :param entry_point: Entrypoint
+        :param exit_opint: Exitpoint (where to stop emulation)
+        :param emu_instance: Optional Unicorn instance to initialize this debugger with
+        :param hide_binary_loader: if True, binary loader submenus will be hidden (good if embedding udbg in a target uc script)
         :param arch: unicorn arch int costant
         :param mode: unicorn mode int costant
-        :return:
+        :param mappings: list of mappings as tuple: [(name, offset, size),...]
+        :return: Fully initialzied Uc instance.
         """
+
+        binary_loader_module = binary_loader.BinaryLoader(self)
+        self.add_module(binary_loader_module)
+
+        if emu_instance:
+            self.emu_instance = emu_instance
+
+        self.current_address = self.entry_point = entry_point
+        self.exit_point = exit_point
 
         # if no arch or mode are sets in param, prompt for them
         if not arch:
-            arch = utils.prompt_arch()
+            if emu_instance:
+                arch = emu_instance._arch
+            else:
+                arch = utils.prompt_arch()
         if not mode:
-            mode = utils.prompt_mode()
+            if emu_instance:
+                mode = emu_instance._mode
+            else:
+                mode = utils.prompt_mode()
 
-        self.arch = getattr(unicorn_const, arch)
-        self.mode = getattr(unicorn_const, mode)
+        if isinstance(arch, str):
+            self.arch = getattr(unicorn_const, arch)
+        else:
+            self.arch = arch
 
-        self.emu_instance = Uc(self.arch, self.mode)
+        if isinstance(mode, str):
+            self.mode = getattr(unicorn_const, mode)
+        else:
+            self.mode = mode
+
+        
+        if not self.emu_instance:
+            self.emu_instance = Uc(self.arch, self.mode)
 
         if self.mode == UC_MODE_THUMB:
             self.is_thumb = True
+
+        if mappings:
+            [self.get_module('mappings_module').internal_add(*mapping[1:], path=mapping[0]) for mapping in mappings]
 
         # add hooks
         self.emu_instance.hook_add(UC_HOOK_CODE, self.dbg_hook_code)
         self.emu_instance.hook_add(UC_HOOK_MEM_WRITE, self.dbg_hook_mem_access)
         self.emu_instance.hook_add(UC_HOOK_MEM_INVALID, self.dbg_hook_mem_invalid)
+
+        return self.emu_instance
+
+    @property
+    def pc(self):
+        if self.arch == UC_ARCH_X86:
+            # not sure if needed?
+            if self.mode == UC_MODE_16:
+                reg = x86_const.UC_X86_REG_IP
+            elif self.mode == UC_MODE_32:
+                reg = x86_const.UC_X86_REG_EIP
+            elif self.mode == UC_MODE_64:
+                reg = x86_const.UC_X86_REG_RIP
+        elif self.arch == UC_ARCH_ARM:
+            reg = arm_const.UC_ARM_REG_PC
+        elif self.arch == UC_ARCH_ARM64: 
+            reg = arm64_const.UC_ARM64_REG_PC
+        elif self.arch == UC_ARCH_MIPS:
+            reg = mips_const.UC_MIPS_REG_PC
+        elif self.arch == UC_ARCH_SPARC:
+            reg = sparc_const.UC_SPARC_REG_PC
+        elif self.arch == CS_ARCH_M68K:
+            reg = m68k_const.UC_M68K_REG_PC
+        else:
+            raise Exception("Unsupported Arch")
+        return self.emu_instance.reg_read(reg)
+
+    def start(self):
+        """
+        main start function, here we handle the command get loop and unicorn istance creation
+       :return:
+        """
+
+        if not self.emu_instance:
+            self.initialize()
 
         utils.clear_terminal()
         print(utils.get_banner())
@@ -469,13 +544,13 @@ class UnicornDbg(object):
             # send command to the parser
             self.functions_instance.parse_command(text)
 
-    def resume_emulation(self, address=0x0, skip_bp=0):
-        if address > 0x0:
+    def resume_emulation(self, address=None, skip_bp=0):
+        if address is not None:
             self.current_address = address
 
         self.skip_bp_count = skip_bp
 
-        if self.exit_point > 0x0:
+        if self.exit_point is not None:
             print(utils.white_bold("emulation") + " started at " + utils.green_bold(hex(self.current_address)))
 
             if len(self.entry_context) == 0:
@@ -492,10 +567,13 @@ class UnicornDbg(object):
                 # registers
                 const = utils.get_arch_consts(self.arch)
                 regs = [k for k, v in const.__dict__.items() if
-                        not k.startswith("__") and k.index("_REG_") > 0]
+                        not k.startswith("__") and "_REG_" in k and not "INVALID" in k]
                 for r in regs:
-                    self.entry_context['regs'][r] = \
-                        self.emu_instance.reg_read(getattr(const, r))
+                    try:
+                        self.entry_context['regs'][r] = self.emu_instance.reg_read(getattr(const, r))
+                    except Exception as ex:
+                        pass 
+                        # print("Ignoring reg: {} ({})".format(r, ex)) -> Ignored UC_X86_REG_MSR
 
             start_addr = self.current_address
             if self.is_thumb:
@@ -526,16 +604,35 @@ class UnicornDbg(object):
     def get_cs_instance(self):
         """ expose capstone instance """
         if self.cs is None:
-            print('\nSetup capstone engine.')
+            # Try to Autodetect CS settings from Unicorn.
+            uc_consts = {key: getattr(unicorn_const, key) for key in dir(unicorn_const)}
+            if self.arch is not None: 
+                try:
+                    arch_name = ["CS" + key[2:] for key, value in uc_consts.items() if "_ARCH_" in key and value == self.arch][0]
+                    #  capstone is imported globally with *
+                    self.cs_arch = getattr(capstone, arch_name)
+                except:
+                    pass # No arch for us.
+            if self.mode is not None:
+                try:
+                    mode_name = ["CS" + key[2:] for key, value in uc_consts.items() if "_MODE_" in key and value == self.mode][0]
+                    #  capstone is imported globally with *
+                    self.cs_mode = getattr(capstone, mode_name)
+                except:
+                    pass # No mode for us.
+        
+            # In case some autodetects failed
             if self.cs_arch is None:
+                print('\nSetup capstone engine manually.')
                 arch = utils.prompt_cs_arch()
                 self.cs_arch = getattr(capstone, arch)
                 self.functions_instance.get_module('configs_module').push_config('cs_arch', arch)
 
-            mode = utils.prompt_cs_mode()
-            self.cs_mode = getattr(capstone, mode)
+            if self.cs_mode is None:
+                mode = utils.prompt_cs_mode()
+                self.cs_mode = getattr(capstone, mode)
 
-            self.functions_instance.get_module('configs_module').push_config('cs_mode', mode)
+            self.functions_instance.get_module('configs_module').push_config('cs_mode', self.cs_mode)
 
             self.cs = Cs(self.cs_arch, self.cs_mode)
         return self.cs

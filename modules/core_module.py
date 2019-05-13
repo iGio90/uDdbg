@@ -348,9 +348,9 @@ class CoreModule(AbstractUnicornDbgModule):
         except Exception as e:
             pass
 
-        if current_address == 0x0:
+        if current_address is None:
             entry_point = self.core_instance.unicorndbg_instance.get_entry_point()
-            if entry_point > 0x0:
+            if entry_point is not None:
                 self.core_instance.unicorndbg_instance.resume_emulation(address=entry_point,
                                                                         skip_bp=skip_bp)
             else:
@@ -360,9 +360,9 @@ class CoreModule(AbstractUnicornDbgModule):
 
     def next(self, func_name, *args):
         current_address = self.core_instance.unicorndbg_instance.get_current_address()
-        if current_address == 0x0:
+        if current_address is None:
             entry_point = self.core_instance.unicorndbg_instance.get_entry_point()
-            if entry_point > 0x0:
+            if entry_point is not None:
                 self.core_instance.unicorndbg_instance.soft_bp = True
                 self.core_instance.unicorndbg_instance.resume_emulation(entry_point)
             else:
