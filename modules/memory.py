@@ -161,7 +161,7 @@ class Memory(AbstractUnicornDbgModule):
         self.core_instance.get_emu_instance().mem_unmap(off, lent)
         mappings = self.core_instance.get_module('mappings_module').get_mappings()
         for i in range(0, len(mappings)):
-            if mappings[i][1] == off:
+            if int(mappings[i][1], 0) == off:
                 map_lent = mappings[i][2]
                 if map_lent == lent:
                     mappings.pop(i)
