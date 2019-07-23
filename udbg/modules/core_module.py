@@ -28,8 +28,8 @@
 #
 #############################################################################
 
-import utils
-from modules.unicorndbgmodule import AbstractUnicornDbgModule
+import udbg.utils as utils
+from udbg.modules.unicorndbgmodule import AbstractUnicornDbgModule
 from termcolor import colored
 import sys
 from tabulate import tabulate

@@ -3,7 +3,7 @@ import re
 from capstone import *
 from unicorn.unicorn_const import *
 
-from modules.unicorndbgmodule import AbstractUnicornDbgModule
+from udbg.modules.unicorndbgmodule import AbstractUnicornDbgModule
 
 class StepOver(AbstractUnicornDbgModule):
 

@@ -30,8 +30,8 @@
 
 import os
 
-import utils
-from modules.unicorndbgmodule import AbstractUnicornDbgModule
+import udbg.utils as utils
+from udbg.modules.unicorndbgmodule import AbstractUnicornDbgModule
 
 
 class BinaryLoader(AbstractUnicornDbgModule):
