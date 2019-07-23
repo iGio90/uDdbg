@@ -28,8 +28,8 @@
 #
 #############################################################################
 
-from modules.unicorndbgmodule import AbstractUnicornDbgModule
-import utils
+from udbg.modules.unicorndbgmodule import AbstractUnicornDbgModule
+import udbg.utils as utils
 
 
 class MyModule(AbstractUnicornDbgModule):

@@ -32,9 +32,9 @@ from tabulate import tabulate
 from unicorn import *
 from unicorn.x86_const import *
 
-import utils
-from modules.unicorndbgmodule import AbstractUnicornDbgModule
-from arch import *
+import udbg.utils as utils
+from udbg.modules.unicorndbgmodule import AbstractUnicornDbgModule
+from udbg.arch import *
 
 
 class Registers(AbstractUnicornDbgModule):

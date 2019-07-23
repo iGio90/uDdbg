@@ -32,8 +32,8 @@ import os
 
 from tabulate import tabulate
 
-import utils
-from modules.unicorndbgmodule import AbstractUnicornDbgModule
+import udbg.utils as utils
+from udbg.modules.unicorndbgmodule import AbstractUnicornDbgModule
 
 
 class Executors(AbstractUnicornDbgModule):
