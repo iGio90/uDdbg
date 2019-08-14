@@ -35,7 +35,7 @@ from capstone import *
 from typing import List, Tuple
 
 from modules.core_module import CoreModule
-from modules import binary_loader, memory, module_test, registers, mappings, patches, asm, configs, executors, find
+from modules import binary_loader, memory, module_test, registers, mappings, patches, asm, configs, executors, find, stepover
 from prompt_toolkit.auto_suggest import AutoSuggestFromHistory
 from prompt_toolkit.history import InMemoryHistory
 from prompt_toolkit.shortcuts import prompt
@@ -101,6 +101,9 @@ class UnicornDbgFunctions(object):
 
         find_module = find.Find(self)
         self.add_module(find_module)
+
+        stepover_module = stepover.StepOver(self)
+        self.add_module(stepover_module)
 
     def exec_command(self, command, args):
         """
