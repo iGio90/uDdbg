@@ -324,7 +324,7 @@ class UnicornDbg(object):
         #           add_module method
         if module_arr:
             for module in module_arr:
-                self.add_module(module)
+                self.add_module(module(self.functions_instance))
 
         # hold some modules
         self.core_module = self.get_module('core_module')
