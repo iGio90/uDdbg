@@ -672,7 +672,7 @@ class UnicornDbg(object):
         return self.entry_point
 
     def get_exit_point(self):
-        return self.entry_point
+        return self.exit_point
 
     def get_module(self, module_key):
         return self.functions_instance.get_module(module_key)
