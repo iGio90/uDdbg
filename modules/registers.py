@@ -34,6 +34,7 @@ from unicorn.x86_const import *
 
 import utils
 from modules.unicorndbgmodule import AbstractUnicornDbgModule
+from arch import *
 
 
 class Registers(AbstractUnicornDbgModule):
@@ -94,18 +95,14 @@ class Registers(AbstractUnicornDbgModule):
         print(utils.titlify('registers'))
         arch = self.core_instance.unicorndbg_instance.arch
         mode = self.core_instance.unicorndbg_instance.mode
-        if arch == UC_ARCH_ARM:
-            self.print_arm_registers()
-        if arch == UC_ARCH_X86:
-            if mode == UC_MODE_16:
-                self.print_x86_16_registers()
-            elif mode == UC_MODE_32:
-                self.print_x86_registers()
-            else:
-                # If mode is none of the above, let's assume x64.
-                self.print_x64_registers()
-        else:
-            print('quick registers view: arch not supported')
+        regtable = getRegStringTable(getArchString(arch, mode))
+        r = []
+        for regcode in regtable:
+            r.append(self.reg(regtable[regcode], regcode))
+        h = [utils.white_bold_underline('register'),
+             utils.white_bold_underline('hex'),
+             utils.white_bold_underline('decimal')]
+        print(tabulate(r, h, tablefmt="simple"))
 
     @property
     def emu_instance(self):
@@ -118,147 +115,6 @@ class Registers(AbstractUnicornDbgModule):
         uc = self.emu_instance
         val = uc.reg_read(uc_const)
         return [utils.green_bold(name), hex(val), val]
-         
-    def print_x86_16registers(self):
-        r = [
-            self.reg("ip", UC_X86_REG_IP),
-            self.reg("di", UC_X86_REG_DI),
-            self.reg("si", UC_X86_REG_SI),
-            self.reg("ax", UC_X86_REG_AX),
-            self.reg("bx", UC_X86_REG_BX),
-            self.reg("cx", UC_X86_REG_CX),
-            self.reg("dx", UC_X86_REG_DX),
-            self.reg("sp", UC_X86_REG_SP),
-            self.reg("bp", UC_X86_REG_BP),
-            self.reg("eflags", UC_X86_REG_EFLAGS),
-            self.reg("cs", UC_X86_REG_CS),
-            self.reg("gs", UC_X86_REG_GS),
-            self.reg("fs", UC_X86_REG_FS),
-            self.reg("ss", UC_X86_REG_SS),
-            self.reg("ds", UC_X86_REG_DS),
-            self.reg("es", UC_X86_REG_ES)
-        ]
-
-        h = [utils.white_bold_underline('register'),
-             utils.white_bold_underline('hex'),
-             utils.white_bold_underline('decimal')]
-        print(tabulate(r, h, tablefmt="simple"))
-
-
-
-    def print_x86_registers(self):
-        r = [
-            self.reg("eip", UC_X86_REG_EIP),
-            self.reg("edi", UC_X86_REG_EDI),
-            self.reg("esi", UC_X86_REG_ESI),
-            self.reg("eax", UC_X86_REG_EAX),
-            self.reg("ebx", UC_X86_REG_EBX),
-            self.reg("ecx", UC_X86_REG_ECX),
-            self.reg("edx", UC_X86_REG_EDX),
-            self.reg("esp", UC_X86_REG_ESP),
-            self.reg("ebp", UC_X86_REG_EBP),
-            self.reg("eflags", UC_X86_REG_EFLAGS),
-            self.reg("cs", UC_X86_REG_CS),
-            self.reg("gs", UC_X86_REG_GS),
-            self.reg("fs", UC_X86_REG_FS),
-            self.reg("ss", UC_X86_REG_SS),
-            self.reg("ds", UC_X86_REG_DS),
-            self.reg("es", UC_X86_REG_ES)
-        ]
-
-        h = [utils.white_bold_underline('register'),
-             utils.white_bold_underline('hex'),
-             utils.white_bold_underline('decimal')]
-        print(tabulate(r, h, tablefmt="simple"))
-
-
-    def print_x64_registers(self):
-        GSMSR = 0xC0000101
-        FSMSR = 0xC0000100
-        # TODO: Find a way to read FS and GSBASE without clobbering memory.
-        #return get_msr(uc, GSMSR)
-        #return get_msr(uc, FSMSR)
-
-        r = [
-            self.reg("rip", UC_X86_REG_RIP),
-            self.reg("rdi", UC_X86_REG_RDI),
-            self.reg("rsi", UC_X86_REG_RSI),
-            self.reg("rax", UC_X86_REG_RAX),
-            self.reg("rbx", UC_X86_REG_RBX),
-            self.reg("rcx", UC_X86_REG_RCX),
-            self.reg("rdx", UC_X86_REG_RDX),
-            self.reg("rsp", UC_X86_REG_RSP),
-            self.reg("rbp", UC_X86_REG_RBP),
-            self.reg("r8", UC_X86_REG_R8),
-            self.reg("r9", UC_X86_REG_R9),
-            self.reg("r10", UC_X86_REG_R10),
-            self.reg("r11", UC_X86_REG_R11),
-            self.reg("r12", UC_X86_REG_R12),
-            self.reg("r13", UC_X86_REG_R13),
-            self.reg("r14", UC_X86_REG_R14),
-            self.reg("r15", UC_X86_REG_R15),
-            self.reg("eflags", UC_X86_REG_EFLAGS),
-        ]
-
-        h = [utils.white_bold_underline('register'),
-             utils.white_bold_underline('hex'),
-             utils.white_bold_underline('decimal')]
-        print(tabulate(r, h, tablefmt="simple"))
-
-
-    def print_arm_registers(self):
-        r0 = self.core_instance.get_emu_instance() \
-            .reg_read(arm_const.UC_ARM_REG_R0)
-        r1 = self.core_instance.get_emu_instance() \
-            .reg_read(arm_const.UC_ARM_REG_R1)
-        r2 = self.core_instance.get_emu_instance() \
-            .reg_read(arm_const.UC_ARM_REG_R2)
-        r3 = self.core_instance.get_emu_instance() \
-            .reg_read(arm_const.UC_ARM_REG_R3)
-        r4 = self.core_instance.get_emu_instance() \
-            .reg_read(arm_const.UC_ARM_REG_R4)
-        r5 = self.core_instance.get_emu_instance() \
-            .reg_read(arm_const.UC_ARM_REG_R5)
-        r6 = self.core_instance.get_emu_instance() \
-            .reg_read(arm_const.UC_ARM_REG_R6)
-        r7 = self.core_instance.get_emu_instance() \
-            .reg_read(arm_const.UC_ARM_REG_R7)
-        r8 = self.core_instance.get_emu_instance() \
-            .reg_read(arm_const.UC_ARM_REG_R8)
-        r9 = self.core_instance.get_emu_instance() \
-            .reg_read(arm_const.UC_ARM_REG_R9)
-        r10 = self.core_instance.get_emu_instance() \
-            .reg_read(arm_const.UC_ARM_REG_R10)
-        r11 = self.core_instance.get_emu_instance() \
-            .reg_read(arm_const.UC_ARM_REG_R11)
-        r12 = self.core_instance.get_emu_instance() \
-            .reg_read(arm_const.UC_ARM_REG_R12)
-        sp = self.core_instance.get_emu_instance() \
-            .reg_read(arm_const.UC_ARM_REG_SP)
-        pc = self.core_instance.get_emu_instance() \
-            .reg_read(arm_const.UC_ARM_REG_PC)
-        lr = self.core_instance.get_emu_instance() \
-            .reg_read(arm_const.UC_ARM_REG_LR)
-        r = [[utils.green_bold("r0"), hex(r0), r0],
-             [utils.green_bold("r1"), hex(r1), r1],
-             [utils.green_bold("r2"), hex(r2), r2],
-             [utils.green_bold("r3"), hex(r3), r3],
-             [utils.green_bold("r4"), hex(r4), r4],
-             [utils.green_bold("r5"), hex(r5), r5],
-             [utils.green_bold("r6"), hex(r6), r6],
-             [utils.green_bold("r7"), hex(r7), r7],
-             [utils.green_bold("r8"), hex(r8), r8],
-             [utils.green_bold("r9"), hex(r9), r9],
-             [utils.green_bold("r10"), hex(r10), r10],
-             [utils.green_bold("r11"), hex(r11), r11],
-             [utils.green_bold("r12"), hex(r12), r12],
-             [utils.green_bold("sp"), hex(sp), sp],
-             [utils.green_bold("pc"), hex(pc), pc],
-             [utils.green_bold("lr"), hex(lr), lr]]
-        h = [utils.white_bold_underline('register'),
-             utils.white_bold_underline('hex'),
-             utils.white_bold_underline('decimal')]
-        print(tabulate(r, h, tablefmt="simple"))
 
     def write(self, func_name, *args):
         arch = self.core_instance.unicorndbg_instance.get_arch()
