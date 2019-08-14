@@ -102,14 +102,14 @@ class Configs(AbstractUnicornDbgModule):
                 except Exception as e:
                     raise Exception('arch not found')
                 self.configs_map[key] = 'CS_ARCH_' + str(args[1]).upper()
-                self.core_instance.set_cs_arch(arch)
+                self.core_instance.get_dbg_instance().set_cs_arch(arch)
             elif key == 'cs_mode':
                 try:
                     mode = getattr(capstone, 'CS_MODE_' + str(args[1]).upper())
                 except Exception as e:
                     raise Exception('mode not found')
                 self.configs_map[key] = 'CS_MODE_' + str(args[1]).upper()
-                self.core_instance.set_cs_mode(mode)
+                self.core_instance.get_dbg_instance().set_cs_mode(mode)
             elif key == 'entry_point':
                 value = int(value)
                 self.core_instance.get_dbg_instance().set_entry_point(value)

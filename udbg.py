@@ -35,7 +35,7 @@ from capstone import *
 from typing import List, Tuple
 
 from modules.core_module import CoreModule
-from modules import binary_loader, memory, module_test, registers, mappings, patches, asm, configs, executors, find
+from modules import binary_loader, memory, module_test, registers, mappings, patches, asm, configs, executors, find, stepover
 from prompt_toolkit.auto_suggest import AutoSuggestFromHistory
 from prompt_toolkit.history import InMemoryHistory
 from prompt_toolkit.shortcuts import prompt
@@ -46,6 +46,7 @@ from unicorn import unicorn_const
 import sys
 import utils
 import copy
+from arch import *
 
 MENU_APPENDIX = '$>'
 MENU_APIX = '[' + colored('*', 'cyan', attrs=['bold', 'dark']) + ']'
@@ -101,6 +102,9 @@ class UnicornDbgFunctions(object):
 
         find_module = find.Find(self)
         self.add_module(find_module)
+
+        stepover_module = stepover.StepOver(self)
+        self.add_module(stepover_module)
 
     def exec_command(self, command, args):
         """
@@ -324,7 +328,7 @@ class UnicornDbg(object):
         #           add_module method
         if module_arr:
             for module in module_arr:
-                self.add_module(module)
+                self.add_module(module(self.functions_instance))
 
         # hold some modules
         self.core_module = self.get_module('core_module')
@@ -492,26 +496,7 @@ class UnicornDbg(object):
 
     @property
     def pc(self):
-        if self.arch == UC_ARCH_X86:
-            # not sure if needed?
-            if self.mode == UC_MODE_16:
-                reg = x86_const.UC_X86_REG_IP
-            elif self.mode == UC_MODE_32:
-                reg = x86_const.UC_X86_REG_EIP
-            elif self.mode == UC_MODE_64:
-                reg = x86_const.UC_X86_REG_RIP
-        elif self.arch == UC_ARCH_ARM:
-            reg = arm_const.UC_ARM_REG_PC
-        elif self.arch == UC_ARCH_ARM64: 
-            reg = arm64_const.UC_ARM64_REG_PC
-        elif self.arch == UC_ARCH_MIPS:
-            reg = mips_const.UC_MIPS_REG_PC
-        elif self.arch == UC_ARCH_SPARC:
-            reg = sparc_const.UC_SPARC_REG_PC
-        elif self.arch == CS_ARCH_M68K:
-            reg = m68k_const.UC_M68K_REG_PC
-        else:
-            raise Exception("Unsupported Arch")
+        reg = getPCCode(getArchString(self.arch, self.mode))
         return self.emu_instance.reg_read(reg)
 
     def start(self):
@@ -604,33 +589,9 @@ class UnicornDbg(object):
     def get_cs_instance(self):
         """ expose capstone instance """
         if self.cs is None:
-            # Try to Autodetect CS settings from Unicorn.
-            uc_consts = {key: getattr(unicorn_const, key) for key in dir(unicorn_const)}
-            if self.arch is not None: 
-                try:
-                    arch_name = ["CS" + key[2:] for key, value in uc_consts.items() if "_ARCH_" in key and value == self.arch][0]
-                    #  capstone is imported globally with *
-                    self.cs_arch = getattr(capstone, arch_name)
-                except:
-                    pass # No arch for us.
-            if self.mode is not None:
-                try:
-                    mode_name = ["CS" + key[2:] for key, value in uc_consts.items() if "_MODE_" in key and value == self.mode][0]
-                    #  capstone is imported globally with *
-                    self.cs_mode = getattr(capstone, mode_name)
-                except:
-                    pass # No mode for us.
-        
-            # In case some autodetects failed
-            if self.cs_arch is None:
-                print('\nSetup capstone engine manually.')
-                arch = utils.prompt_cs_arch()
-                self.cs_arch = getattr(capstone, arch)
-                self.functions_instance.get_module('configs_module').push_config('cs_arch', arch)
-
-            if self.cs_mode is None:
-                mode = utils.prompt_cs_mode()
-                self.cs_mode = getattr(capstone, mode)
+            if self.arch is not None or self.mode is not None:
+                archstring = getArchString(self.arch, self.mode)
+                self.cs_arch , self.cs_mode = getCapstoneSetup(archstring)
 
             self.functions_instance.get_module('configs_module').push_config('cs_mode', self.cs_mode)
 
@@ -672,7 +633,7 @@ class UnicornDbg(object):
         return self.entry_point
 
     def get_exit_point(self):
-        return self.entry_point
+        return self.exit_point
 
     def get_module(self, module_key):
         return self.functions_instance.get_module(module_key)
