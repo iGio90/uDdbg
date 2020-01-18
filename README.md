@@ -6,6 +6,9 @@ A gdb like debugger that provide a runtime env to unicorn emulator and additiona
 ## Info, features, help  
 * [Description, short features introduction and little usage case](http://www.giovanni-rocca.com/debug-static-context-uddbg-unicorn-dope-debugger/)
 * [Wiki](https://github.com/iGio90/uDdbg/wiki)
+
+## Installation
+`pip3 install --user .`
   
 ## Get in touch  
 * https://discord.gg/hTVhy3V  

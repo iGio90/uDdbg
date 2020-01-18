@@ -22,6 +22,9 @@ setuptools.setup(
         'termcolor',
         'tabulate',
         'prompt-toolkit',
-        'hexdump'
+        'hexdump',
+        'keystone-engine',
+        'capstone',
+        'unicorn'
     ]
 )
