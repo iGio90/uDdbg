@@ -59,10 +59,12 @@ def titlify(text):
 
 def get_terminal_size():
     """Return the current terminal size."""
-    cmd = struct.unpack("hh", fcntl.ioctl(1, termios.TIOCGWINSZ, "1234"))
-    tty_rows, tty_columns = int(cmd[0]), int(cmd[1])
-    return tty_rows, tty_columns
-
+    try:
+        cmd = struct.unpack("hh", fcntl.ioctl(1, termios.TIOCGWINSZ, "1234"))
+        tty_rows, tty_columns = int(cmd[0]), int(cmd[1])
+        return tty_rows, tty_columns
+    except Exception as ex:
+        return 80, 120
 
 def clear_terminal():
     os.system('cls' if os.name == 'nt' else 'clear' if 'unix' else "clear && printf '\e[3J'")
