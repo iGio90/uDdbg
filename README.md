@@ -22,7 +22,7 @@ A gdb like debugger that provide a runtime env to unicorn emulator and additiona
 
 ---
 
-Copyright (C) 2019  
+```Copyright (C) 2020 
 Giovanni -iGio90- Rocca, Vincenzo -rEDSAMK- Greco  
   
 This program is free software: you can redistribute it and/or modify  
@@ -36,3 +36,4 @@ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.  
 You should have received a copy of the GNU General Public License  
 along with this program.  If not, see <https://www.gnu.org/licenses/>
+```
