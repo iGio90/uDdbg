@@ -34,8 +34,8 @@ from capstone import *
 
 from typing import List, Tuple
 
-from modules.core_module import CoreModule
-from modules import binary_loader, memory, module_test, registers, mappings, patches, asm, configs, executors, find, stepover
+from udbg.modules.core_module import CoreModule
+from udbg.modules import binary_loader, memory, module_test, registers, mappings, patches, asm, configs, executors, find, stepover
 from prompt_toolkit.auto_suggest import AutoSuggestFromHistory
 from prompt_toolkit.history import InMemoryHistory
 from prompt_toolkit.shortcuts import prompt
@@ -44,9 +44,9 @@ from unicorn import *
 from unicorn import unicorn_const
 
 import sys
-import utils
+import udbg.utils as utils
 import copy
-from arch import *
+from udbg.arch import *
 
 MENU_APPENDIX = '$>'
 MENU_APIX = '[' + colored('*', 'cyan', attrs=['bold', 'dark']) + ']'

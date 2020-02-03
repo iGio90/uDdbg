@@ -31,8 +31,8 @@
 import capstone
 import keystone
 
-import utils
-from modules.unicorndbgmodule import AbstractUnicornDbgModule
+import udbg.utils as utils
+from udbg.modules.unicorndbgmodule import AbstractUnicornDbgModule
 
 
 class ASM(AbstractUnicornDbgModule):

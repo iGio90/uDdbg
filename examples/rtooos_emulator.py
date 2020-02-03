@@ -14,9 +14,7 @@ from unicorn import *
 from unicorn.x86_const import *
 import capstone
 
-# We'll add the parent path to PYTHONPATH to be able to run this inside ./example
-import os.path
-sys.path.append(os.path.join(os.path.dirname(os.path.realpath(__file__)), os.pardir))
+# Make sure you have installed uddbg first.
 from udbg import UnicornDbg
 
 __author__ = "domenukk"
