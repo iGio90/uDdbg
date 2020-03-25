@@ -1,6 +1,6 @@
 #############################################################################
 #
-#    Copyright (C) 2019
+#    Copyright (C) 2020
 #    Giovanni -iGio90- Rocca, Vincenzo -rEDSAMK- Greco
 #
 #    This program is free software: you can redistribute it and/or modify
@@ -645,9 +645,13 @@ class UnicornDbg(object):
         self.functions_instance.exec_command(command)
 
 
-if __name__ == "__main__":
+def main():
     udbg = UnicornDbg()
     t = module_test.MyModule(udbg)
     udbg.add_module(t)
 
     udbg.start()
+
+
+if __name__ == "__main__":
+    main()
