@@ -28,14 +28,11 @@
 #
 #############################################################################
 
-import capstone
-
-from capstone import *
-
 from typing import List, Tuple
 
 from udbg.modules.core_module import CoreModule
-from udbg.modules import binary_loader, memory, module_test, registers, mappings, patches, asm, configs, executors, find, stepover
+from udbg.modules import binary_loader, memory, module_test, registers, mappings, patches, asm, configs, executors, \
+    find, stepover
 from prompt_toolkit.auto_suggest import AutoSuggestFromHistory
 from prompt_toolkit.history import InMemoryHistory
 from prompt_toolkit.shortcuts import prompt
@@ -308,7 +305,7 @@ class UnicornDbg(object):
         self.is_thumb = False
         self.cs_arch = None
         self.cs_mode = None
-        self.emu_instance = None # type: Uc
+        self.emu_instance = None  # type: Uc
         self.cs = None
         self.entry_point = None
         self.exit_point = None
@@ -349,7 +346,7 @@ class UnicornDbg(object):
         """
         Unicorn instructions hook
         """
-        try: 
+        try:
             self.current_address = address
 
             hit_soft_bp = False
@@ -362,7 +359,7 @@ class UnicornDbg(object):
 
             if address != self.last_bp and \
                     (address in self.core_module.get_breakpoints_list() or
-                    self.has_soft_bp):
+                     self.has_soft_bp):
                 if self.skip_bp_count > 0:
                     self.skip_bp_count -= 1
                 else:
@@ -374,8 +371,8 @@ class UnicornDbg(object):
 
                     print(utils.titlify('breakpoint'))
                     print('[' + utils.white_bold(str(self.breakpoint_count)) +
-                        ']' + ' hit ' + utils.red_bold('breakpoint') +
-                        ' at: ' + utils.green_bold(hex(address)))
+                          ']' + ' hit ' + utils.red_bold('breakpoint') +
+                          ' at: ' + utils.green_bold(hex(address)))
                     self._print_context(uc, address)
             elif address == self.last_bp:
                 self.last_bp = 0
@@ -429,8 +426,8 @@ class UnicornDbg(object):
         """
         self.functions_instance.add_module(module)
 
-    def initialize(self, emu_instance: Uc=None, arch=None, mode=None, hide_binary_loader=False,
-            entry_point=None, exit_point=None, mappings: List[Tuple[str, int, int]]=None) -> Uc:
+    def initialize(self, emu_instance: Uc = None, arch=None, mode=None, hide_binary_loader=False,
+                   entry_point=None, exit_point=None, mappings: List[Tuple[str, int, int]] = None) -> Uc:
         """
         Initializes the emulator with all needed hooks. 
         Will return the unicorn emu_instance ready to go. 
@@ -477,7 +474,6 @@ class UnicornDbg(object):
         else:
             self.mode = mode
 
-        
         if not self.emu_instance:
             self.emu_instance = Uc(self.arch, self.mode)
 
@@ -557,7 +553,7 @@ class UnicornDbg(object):
                     try:
                         self.entry_context['regs'][r] = self.emu_instance.reg_read(getattr(const, r))
                     except Exception as ex:
-                        pass 
+                        pass
                         # print("Ignoring reg: {} ({})".format(r, ex)) -> Ignored UC_X86_REG_MSR
 
             start_addr = self.current_address
@@ -591,7 +587,7 @@ class UnicornDbg(object):
         if self.cs is None:
             if self.arch is not None or self.mode is not None:
                 archstring = getArchString(self.arch, self.mode)
-                self.cs_arch , self.cs_mode = getCapstoneSetup(archstring)
+                self.cs_arch, self.cs_mode = getCapstoneSetup(archstring)
 
             self.functions_instance.get_module('configs_module').push_config('cs_mode', self.cs_mode)
 
