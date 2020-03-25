@@ -30,6 +30,8 @@
 
 from typing import List, Tuple
 
+from prompt_toolkit.formatted_text import FormattedText
+
 from udbg.modules.core_module import CoreModule
 from udbg.modules import binary_loader, memory, module_test, registers, mappings, patches, asm, configs, executors, \
     find, stepover
@@ -509,11 +511,9 @@ class UnicornDbg(object):
         print('\n\n\t' + utils.white_bold('Contribute ') + 'https://github.com/iGio90/uDdbg\n')
         print('\t' + 'Type ' + utils.white_bold_underline('help') + ' to begin.\n')
 
-        main_apix = colored(MENU_APPENDIX + " ", 'red', attrs=['bold', 'dark'])
         print()
         while True:
-            print(main_apix, end='', flush=True)
-            text = prompt('', history=self.history, auto_suggest=AutoSuggestFromHistory())
+            text = prompt(FormattedText([('ansired bold', MENU_APPENDIX + ' ')]), history=self.history, auto_suggest=AutoSuggestFromHistory())
 
             # only grant the use of empty command to replicate the last command while in cli. No executors
             if len(text) == 0 and self.last_command is not None:
