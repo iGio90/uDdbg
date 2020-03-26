@@ -4,6 +4,28 @@ import setuptools
 with open("README.md", "r") as fh:
     long_description = fh.read()
 
+
+def fix_setuptools():
+    """
+    Work around bugs in setuptools.
+    Some versions of setuptools are broken and raise SandboxViolation for normal
+    operations in a virtualenv. We therefore disable the sandbox to avoid these
+    issues.
+    """
+    try:
+        from setuptools.sandbox import DirectorySandbox
+
+        def violation(operation, *args, **_):
+            print("SandboxViolation: %s" % (args,))
+
+        DirectorySandbox._violation = violation
+    except ImportError:
+        pass
+
+
+# Fix bugs in setuptools.
+fix_setuptools()
+
 setuptools.setup(
     name="udbg",
     version="0.0.1",
