@@ -8,7 +8,13 @@ A gdb like debugger that provide a runtime env to unicorn emulator and additiona
 * [Wiki](https://github.com/iGio90/uDdbg/wiki)
 
 ## Installation
-`pip3 install --user .`
+make sure keystone-engine is installed.
+
+`python3 setup.py install`
+
+a shortcut launcher will be created in local binaries and you can start it from your terminal with:
+
+```uddbg```
   
 ## Get in touch  
 * https://discord.gg/hTVhy3V  
