@@ -30,6 +30,7 @@
 
 import capstone
 import keystone
+from unicorn import UC_ARCH_ARM, UC_ARCH_ARM64
 
 import udbg.utils as utils
 from udbg.modules.unicorndbgmodule import AbstractUnicornDbgModule
@@ -139,6 +140,8 @@ class ASM(AbstractUnicornDbgModule):
                 print(utils.green_bold(a) + "\t%s\t%s" % (i.mnemonic, i.op_str))
 
     def internal_disassemble(self, buf, off, current_off=0):
+        if self.core_instance.get_emu_instance()._arch == UC_ARCH_ARM or self.core_instance.get_emu_instance()._arch == UC_ARCH_ARM64:
+            current_off += 2
         cs = self.core_instance.get_cs_instance()
         for i in cs.disasm(bytes(buf), off):
             if i.address == current_off:

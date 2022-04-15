@@ -410,6 +410,8 @@ class UnicornDbg(object):
         self.asm_module.internal_disassemble(uc.mem_read(start, 0x32), start, address)
 
     def _print_context(self, uc, pc):
+        if self.arch == UC_ARCH_ARM or self.arch == UC_ARCH_ARM64:
+            pc -= 2
         self.register_module.registers('mem_invalid')
         print(utils.titlify('disasm'))
         self.asm_module.internal_disassemble(uc.mem_read(pc - 0x16, 0x32), pc - 0x16, pc)
