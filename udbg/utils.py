@@ -218,7 +218,7 @@ def indexof(str, str_search):
 
 def u_eval(core_instance, val):
     val = str(val)
-    r = r"([$@][a-z0-9]+)(\W|$)"
+    r = r"([$@&][a-z0-9_]+)(\W|$)"
     m = re.finditer(r, val)
     for n, match in enumerate(m):
         if len(match.groups()) > 0:
@@ -227,4 +227,8 @@ def u_eval(core_instance, val):
                 rv = core_instance.get_module('registers_module').read_register(v[1:].upper())
                 if rv:
                     val = val.replace(v, str(rv))
+            elif v.startswith("&"):
+                label_address = core_instance.get_module('labels_module').get_address(v[1:])
+                if label_address:
+                    val = hex(int(label_address, base=16)) #because mapping_address might not have a preprended '0x'
     return int(eval(val))

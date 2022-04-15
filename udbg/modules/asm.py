@@ -30,6 +30,7 @@
 
 import capstone
 import keystone
+import shutil
 from unicorn import UC_ARCH_ARM, UC_ARCH_ARM64
 
 import udbg.utils as utils
@@ -143,13 +144,30 @@ class ASM(AbstractUnicornDbgModule):
         if self.core_instance.get_emu_instance()._arch == UC_ARCH_ARM or self.core_instance.get_emu_instance()._arch == UC_ARCH_ARM64:
             current_off += 2
         cs = self.core_instance.get_cs_instance()
+        labels_module = self.core_instance.get_module('labels_module')
+        width, _ = shutil.get_terminal_size()
         for i in cs.disasm(bytes(buf), off):
+            label = labels_module.search_label(i.address)
+            if label:
+                label = label[0]
+            else:
+                label = ''
             if i.address == current_off:
                 a = utils.red_bold(hex(i.address))
             else:
                 a = utils.green_bold(hex(i.address))
-            print(a + "\t%s\t%s" % ((utils.white_bold(str(i.mnemonic).upper()),
-                                    str(i.op_str).upper().replace('X', 'x'))))
+            raw_op_str = i.op_str.upper().replace('X', 'x')
+            if 1 in i.groups:
+                if raw_op_str.startswith('#'):
+                    label_for_target = labels_module.search_label(int(raw_op_str.lstrip('#'), base=16))
+                    if label_for_target:
+                        raw_op_str += " ({})".format(label_for_target[0])
+            mnemonic = utils.white_bold(str(i.mnemonic).upper())
+            op_str = raw_op_str
+            lhs = "\t{}\t{}".format(mnemonic, op_str)
+            rhs = label
+            lhs_l = len("{}\t{}\t{}".format(hex(i.address), str(i.mnemonic), raw_op_str).expandtabs()) + 1
+            print("{} {:>{rhs_l}}".format(a + lhs, rhs, rhs_l=width - lhs_l))
 
     def prompt_ks_arch(self):
         items = [k for k, v in keystone.__dict__.items() if not k.startswith("__") and k.startswith("KS_ARCH")]

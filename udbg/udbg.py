@@ -34,7 +34,7 @@ from prompt_toolkit.formatted_text import FormattedText
 
 from udbg.modules.core_module import CoreModule
 from udbg.modules import binary_loader, memory, module_test, registers, mappings, patches, asm, configs, executors, \
-    find, stepover
+    find, stepover, labels
 from prompt_toolkit.auto_suggest import AutoSuggestFromHistory
 from prompt_toolkit.history import InMemoryHistory
 from prompt_toolkit.shortcuts import prompt
@@ -80,6 +80,9 @@ class UnicornDbgFunctions(object):
 
         mappings_module = mappings.Mappings(self)
         self.add_module(mappings_module)
+
+        labels_module = labels.Labels(self)
+        self.add_module(labels_module)
 
         memory_module = memory.Memory(self)
         self.add_module(memory_module)
@@ -431,7 +434,8 @@ class UnicornDbg(object):
         self.functions_instance.add_module(module)
 
     def initialize(self, emu_instance: Uc = None, arch=None, mode=None, hide_binary_loader=False,
-                   entry_point=None, exit_point=None, mappings: List[Tuple[str, int, int]] = None) -> Uc:
+                   entry_point=None, exit_point=None, mappings: List[Tuple[str, int, int]] = None,
+                   labels: List[Tuple[str, int]] = None, ghidra_csv_labels_path: str = None) -> Uc:
         """
         Initializes the emulator with all needed hooks. 
         Will return the unicorn emu_instance ready to go. 
@@ -486,6 +490,12 @@ class UnicornDbg(object):
 
         if mappings:
             [self.get_module('mappings_module').internal_add(*mapping[1:], path=mapping[0]) for mapping in mappings]
+
+        if labels:
+            [self.get_module('labels_module').add(label) for label in labels]
+
+        if ghidra_csv_labels_path:
+            self.get_module('labels_module').add_ghidra_csv_labels_path(ghidra_csv_labels_path)
 
         # add hooks
         self.emu_instance.hook_add(UC_HOOK_CODE, self.dbg_hook_code)
@@ -594,17 +604,20 @@ class UnicornDbg(object):
             self.functions_instance.get_module('configs_module').push_config('cs_mode', self.cs_mode)
 
             self.cs = Cs(self.cs_arch, self.cs_mode)
+            self.cs.detail = True
         return self.cs
 
     def set_cs_arch(self, arch):
         self.cs_arch = arch
         if self.cs_mode is not None:
             self.cs = Cs(self.cs_arch, self.cs_mode)
+            self.cs.detail = True
 
     def set_cs_mode(self, mode):
         self.cs_mode = mode
         if self.cs_arch is not None:
             self.cs = Cs(self.cs_arch, self.cs_mode)
+            self.cs.detail = True
 
     def set_entry_point(self, entry_point):
         self.entry_point = entry_point
