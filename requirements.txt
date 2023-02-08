@@ -6,4 +6,4 @@ capstone==4.0.1
 hexdump==3.3
 keystone_engine==0.9.1.post3
 tabulate==0.8.2
-keystone==15.0.1
+keystone==22.0.0
